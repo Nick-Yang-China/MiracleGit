@@ -7,7 +7,7 @@ import org.eclipse.jgit.lib.Repository;
  * interface for JGit operations
  *
  */
-public interface GitControlService {
+public interface GitControlOperation {
 	
 
 		/**

@@ -38,7 +38,7 @@ import com.miracle.apps.git.core.errors.CoreException;
  * This class implements the merge of a ref with the current head
  *
  */
-public class MergeOperation implements GitControlService{
+public class MergeOperation implements GitControlOperation{
 
 	private final Repository repository;
 

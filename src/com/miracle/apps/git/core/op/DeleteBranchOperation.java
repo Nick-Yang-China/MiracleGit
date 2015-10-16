@@ -17,7 +17,7 @@ import com.miracle.apps.git.core.errors.CoreException;
 /**
  * This class implements deletion of a branch
  */
-public class DeleteBranchOperation implements GitControlService {
+public class DeleteBranchOperation implements GitControlOperation {
 	/** Operation was performed */
 	public final static int OK = 0;
 

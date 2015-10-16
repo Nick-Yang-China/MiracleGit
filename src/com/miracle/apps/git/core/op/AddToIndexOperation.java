@@ -10,7 +10,7 @@ import org.eclipse.jgit.treewalk.FileTreeIterator;
 
 /**
  */
-public class AddToIndexOperation implements GitControlService{
+public class AddToIndexOperation implements GitControlOperation{
 	private final Collection<?> rsrcList;
 	
 	private Repository repo;

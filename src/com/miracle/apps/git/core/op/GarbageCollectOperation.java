@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.Repository;
 /**
  * Operation to garbage collect a git repository
  */
-public class GarbageCollectOperation implements GitControlService {
+public class GarbageCollectOperation implements GitControlOperation {
 
 	private Repository repository;
 

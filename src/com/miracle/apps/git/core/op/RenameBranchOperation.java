@@ -10,7 +10,7 @@ import org.eclipse.jgit.lib.Repository;
 /**
  * This class implements renaming of a branch
  */
-public class RenameBranchOperation implements GitControlService {
+public class RenameBranchOperation implements GitControlOperation {
 	private final Repository repository;
 
 	private final Ref branch;

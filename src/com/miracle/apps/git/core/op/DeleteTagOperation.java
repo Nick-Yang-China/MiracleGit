@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.Repository;
 /**
  * Operation that deletes a tag
  */
-public class DeleteTagOperation implements GitControlService {
+public class DeleteTagOperation implements GitControlOperation {
 
 	private final Repository repository;
 

@@ -26,7 +26,7 @@ import com.miracle.apps.git.core.errors.CoreException;
 /**
  * This class implements the commit of a list of files.
  */
-public class CommitOperation implements GitControlService {
+public class CommitOperation implements GitControlOperation {
 
 	Collection<String> commitFileList;
 

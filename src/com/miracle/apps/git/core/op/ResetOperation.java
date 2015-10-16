@@ -11,7 +11,7 @@ import com.miracle.apps.git.core.errors.CoreException;
 /**
  * A class for changing a ref and possibly index and workdir too.
  */
-public class ResetOperation implements GitControlService {
+public class ResetOperation implements GitControlOperation {
 
 	private final Repository repository;
 

@@ -16,7 +16,7 @@ import org.eclipse.jgit.lib.RefUpdate.Result;
 /**
  * Tags repository with given {@link TagBuilder} object.
  */
-public class TagOperation implements GitControlService {
+public class TagOperation implements GitControlOperation {
 
 	private final TagBuilder tag;
 	private final Repository repo;

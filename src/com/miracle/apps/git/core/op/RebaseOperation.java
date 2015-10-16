@@ -30,7 +30,7 @@ import org.eclipse.jgit.merge.MergeStrategy;
 /**
  * This class implements rebase.
  */
-public class RebaseOperation implements GitControlService {
+public class RebaseOperation implements GitControlOperation {
 	private final Repository repository;
 
 	private final Ref ref;

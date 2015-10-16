@@ -15,7 +15,7 @@ import org.eclipse.jgit.lib.Repository;
 /**
  * Remove from Git Index operation (unstage).
  */
-public class RemoveFromIndexOperation implements GitControlService {
+public class RemoveFromIndexOperation implements GitControlOperation {
 
 	private  Collection<String> pathsby;
 	private  Repository repo;

@@ -24,7 +24,7 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 /**
  * Wraps the JGit API {@link PullCommand} into an operation
  */
-public class PullOperation implements GitControlService{
+public class PullOperation implements GitControlOperation{
 	private final Repository[] repositories;
 
 	private final Map<Repository, Object> results = new LinkedHashMap<Repository, Object>();
@@ -59,7 +59,7 @@ public class PullOperation implements GitControlService{
 //								new SubProgressMonitor(mymonitor, 1)));
 						pull.setTimeout(timeout);
 						pull.setCredentialsProvider(credentialsProvider);
-						MergeStrategy strategy = null;// Activator.getDefault().getPreferredMergeStrategy();
+						MergeStrategy strategy = MergeStrategy.OURS;// Activator.getDefault().getPreferredMergeStrategy();
 						if (strategy != null) {
 							pull.setStrategy(strategy);
 						}

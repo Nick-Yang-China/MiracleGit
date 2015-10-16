@@ -17,7 +17,7 @@ import com.miracle.apps.git.core.errors.CoreException;
  * This class implements creation of a local branch based on a commit or another
  * branch
  */
-public class CreateLocalBranchOperation implements GitControlService {
+public class CreateLocalBranchOperation implements GitControlOperation {
 	private final String name;
 
 	private final Repository repository;
