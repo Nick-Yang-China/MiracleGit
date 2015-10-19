@@ -25,7 +25,7 @@ public class AddToIndexOperation implements GitControlOperation{
 	 * 			  a git repository
 	 */
 	
-	public AddToIndexOperation(final Collection<?> rsrcs,Repository repository) {
+	public AddToIndexOperation(final Collection<String> rsrcs,Repository repository) {
 		rsrcList = rsrcs;
 		repo=repository;
 	}
@@ -56,6 +56,9 @@ public class AddToIndexOperation implements GitControlOperation{
 		if ("".equals(filepattern)) //$NON-NLS-1$
 			filepattern = "."; //$NON-NLS-1$
 		
-		return command;
+		if(filepattern.contains("\\"))
+			filepattern=filepattern.replace("\\", "/");
+		
+		return command.addFilepattern(filepattern);
 	}
 }

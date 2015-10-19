@@ -3,6 +3,7 @@ package com.miracle.apps.git.core.op;
 import static org.eclipse.jgit.lib.Constants.HEAD;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.GitCommand;
@@ -31,12 +32,18 @@ public class RemoveFromIndexOperation implements GitControlOperation {
 		this.repo=repository;
 	}
 
+	
+	public RemoveFromIndexOperation(ArrayList<String> paths,Repository repository) {
+		this.pathsby = paths;
+		this.repo=repository;
+	}
 
 	@Override
 	public void execute() throws GitAPIException {
+		
 			GitCommand<?> command = prepareCommand();
+			
 			command.call();
-
 	}
 
 
