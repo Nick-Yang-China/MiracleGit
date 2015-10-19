@@ -17,6 +17,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.FileUtils;
 
 /**
  * Utility class for handling Repositories.
@@ -214,6 +215,23 @@ public class RepositoryUtil {
 		String repoPath = getRepoRelativePath(path);
 		DirCache dc = DirCache.read(repository.getIndexFile(), repository.getFS());
 		return dc.getEntry(repoPath);
+	}
+	
+	public boolean removeLocalRepository(Repository repository){
+		
+		File rootDir=repository.getDirectory();
+		
+		if (rootDir.exists()){
+			try {
+				FileUtils.delete(rootDir, FileUtils.RECURSIVE | FileUtils.RETRY);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
+			}
+			return true;
+		}
+		
+		return false;
 	}
 
 }
