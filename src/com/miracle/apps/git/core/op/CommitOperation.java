@@ -52,6 +52,30 @@ public class CommitOperation implements GitControlOperation {
 
 	RevCommit commit = null;
 
+	/**
+	 * @param repository
+	 * @param filesToCommit
+	 *            a list of files which will be included in the commit
+	 * @param notTracked
+	 *            a list of all untracked files
+	 * @param author
+	 *            the author of the commit
+	 * @param committer
+	 *            the committer of the commit
+	 * @param message
+	 *            the commit message
+	 * @throws CoreException
+	 */
+	public CommitOperation(Collection<String> filesToCommit, Collection<String> notTracked,
+			String author, String committer, String message) throws CoreException {
+		this.author = author;
+		this.committer = committer;
+		this.message = message;
+		if (filesToCommit != null)
+			commitFileList = new HashSet<String>(filesToCommit);
+		if (notTracked != null)
+			this.notTracked = new HashSet<String>(notTracked);
+	}
 
 	/**
 	 * @param repository
@@ -97,15 +121,6 @@ public class CommitOperation implements GitControlOperation {
 	}
 
 
-//	private void setRepository(File file) throws CoreException {
-//		RepositoryMapping mapping = RepositoryMapping.getMapping(file);
-//		if (mapping == null)
-//			throw new CoreException(Activator.error(NLS.bind(
-//					CoreText.CommitOperation_couldNotFindRepositoryMapping,
-//					file), null));
-//		repo = mapping.getRepository();
-//	}
-
 	/**
 	 * @param repository
 	 */
@@ -113,34 +128,48 @@ public class CommitOperation implements GitControlOperation {
 		repo = repository;
 	}
 
-	private Collection<String> buildFileList(Collection<File> files) throws CoreException {
-		Collection<String> result = new HashSet<String>();
-		for (File file : files) {
-//			RepositoryMapping mapping = RepositoryMapping.getMapping(file);
-//			if (mapping == null)
-//				throw new CoreException(Activator.error(NLS.bind(CoreText.CommitOperation_couldNotFindRepositoryMapping, file), null));
-//			String repoRelativePath = mapping.getRepoRelativePath(file);
-			result.add(file.getPath());
-		}
-		return result;
-	}
+//	private Collection<String> buildFileList(Collection<File> files) throws CoreException {
+//		Collection<String> result = new HashSet<String>();
+//		for (File file : files) {
+////			RepositoryMapping mapping = RepositoryMapping.getMapping(file);
+////			if (mapping == null)
+////				throw new CoreException(Activator.error(NLS.bind(CoreText.CommitOperation_couldNotFindRepositoryMapping, file), null));
+////			String repoRelativePath = mapping.getRepoRelativePath(file);
+//			result.add(file.getPath());
+//		}
+//		return result;
+//	}
 
 	@Override
 	public void execute() throws GitAPIException {
-					commitAll();
+		if (commitAll){
+			commitAll();
+		}
+		else if (amending || commitFileList != null
+				&& commitFileList.size() > 0 || commitIndex) {
+			addUntracked();
+			commit();
+		} else if (commitWorkingDirChanges) {
+			// TODO commit -a
+		} else {
+			// TODO commit
+		}
 	}
 
 
 	private void addUntracked() throws CoreException {
-		if (notTracked == null || notTracked.size() == 0)
+		if (notTracked == null || notTracked.size() == 0){
 			return;
+		}
 		AddCommand addCommand = new Git(repo).add();
 		boolean fileAdded = false;
-		for (String path : notTracked)
+		for (String path : notTracked){
+			
 			if (commitFileList.contains(path)) {
 				addCommand.addFilepattern(path);
 				fileAdded = true;
 			}
+		}
 		if (fileAdded)
 			try {
 				addCommand.call();
@@ -150,6 +179,22 @@ public class CommitOperation implements GitControlOperation {
 	}
 
 
+	private void commit() throws CoreException {
+		Git git = new Git(repo);
+		try {
+			CommitCommand commitCommand = git.commit();
+			setAuthorAndCommitter(commitCommand);
+			commitCommand.setAmend(amending)
+					.setMessage(message)
+					.setInsertChangeId(createChangeId);
+			if (!commitIndex)
+				for(String path:commitFileList)
+					commitCommand.setOnly(path);
+			commit = commitCommand.call();
+		} catch (Exception e) {
+			throw new CoreException("An internal error occurred", e);
+		}
+	}
 	/**
 	 *
 	 * @param amending
@@ -204,12 +249,11 @@ public class CommitOperation implements GitControlOperation {
 		final PersonIdent enteredAuthor = RawParseUtils.parsePersonIdent(author);
 		final PersonIdent enteredCommitter = RawParseUtils.parsePersonIdent(committer);
 		if (enteredAuthor == null)
-			throw new CoreException("The person ident ''{0}'' could not be parsed.");
+			throw new CoreException("The enteredAuthor could not be parsed.");
 		if (enteredCommitter == null)
-			throw new CoreException("The person ident ''{0}'' could not be parsed.");
+			throw new CoreException("The enteredCommitter could not be parsed.");
 
-		PersonIdent authorIdent;
-			authorIdent = new PersonIdent(enteredAuthor, commitDate, timeZone);
+		final PersonIdent authorIdent = new PersonIdent(enteredAuthor, commitDate, timeZone);
 
 		final PersonIdent committerIdent = new PersonIdent(enteredCommitter, commitDate, timeZone);
 
