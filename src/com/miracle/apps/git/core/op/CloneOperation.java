@@ -28,19 +28,59 @@ public class CloneOperation {
 
 	private boolean cloneSubmodules;
 
-	private final Collection<Ref> selectedBranches;
+	private Collection<Ref> selectedBranches;
 
 	private final File workdir;
 
 	private final File gitdir;
 
-	private final String refName;
+	private String refName;
 
-	private final String remoteName;
+	private String remoteName;
 
-	private final int timeout;
+	private int timeout;
 
 	private CredentialsProvider credentialsProvider;
+	
+	/**
+	 * Create a new clone operation.
+	 *
+	 * @param uri
+	 *            remote we should fetch from.
+	 * @param allSelected
+	 *            true when all branches have to be fetched (indicates wildcard
+	 *            in created fetch refspec), false otherwise.
+	 * @param workdir
+	 *            working directory to clone to. The directory may or may not
+	 *            already exist.
+	 */
+	public CloneOperation(final URIish uri, final boolean allSelected, final File workdir) {
+		this.uri = uri;
+		this.allSelected = allSelected;
+		this.workdir = workdir;
+		this.gitdir = new File(workdir, Constants.DOT_GIT);
+	}
+	
+
+	public void setSelectedBranches(Collection<Ref> selectedBranches) {
+		this.selectedBranches = selectedBranches;
+	}
+
+
+	public void setRefName(String refName) {
+		this.refName = refName;
+	}
+
+
+	public void setRemoteName(String remoteName) {
+		this.remoteName = remoteName;
+	}
+
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+
 
 	/**
 	 * Create a new clone operation.
@@ -111,8 +151,8 @@ public class CloneOperation {
 			cloneRepository.setCredentialsProvider(credentialsProvider);
 			if (refName != null)
 				cloneRepository.setBranch(refName);
-			else
-				cloneRepository.setNoCheckout(true);
+//			else
+//				cloneRepository.setNoCheckout(true);
 			cloneRepository.setDirectory(workdir);
 			cloneRepository.setRemote(remoteName);
 			cloneRepository.setURI(uri.toString());

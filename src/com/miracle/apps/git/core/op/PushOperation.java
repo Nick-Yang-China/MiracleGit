@@ -125,39 +125,16 @@ public class PushOperation {
 
 		if (this.specification != null)
 			for (URIish uri : this.specification.getURIs()) {
-				for (RemoteRefUpdate update : this.specification
-						.getRefUpdates(uri))
+				for (RemoteRefUpdate update : this.specification.getRefUpdates(uri))
 					if (update.getStatus() != Status.NOT_ATTEMPTED)
 						throw new IllegalStateException("The RemoteRefUpdate instance cannot be re-used");
 			}
-		final int totalWork;
-		if (specification != null)
-			totalWork = specification.getURIsNumber()
-					* WORK_UNITS_PER_TRANSPORT;
-		else
-			totalWork = 1;
-//		if (dryRun)
-//			monitor.beginTask(CoreText.PushOperation_taskNameDryRun, totalWork);
-//		else
-//			monitor.beginTask(CoreText.PushOperation_taskNameNormalRun,
-//					totalWork);
 
 		operationResult = new PushOperationResult();
 		Git git = new Git(localDb);
 
-		if (specification != null)
+		if (specification != null){
 			for (final URIish uri : specification.getURIs()) {
-//				final SubProgressMonitor subMonitor = new SubProgressMonitor(
-//						monitor, WORK_UNITS_PER_TRANSPORT,
-//						SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-
-				try {
-//					if (monitor.isCanceled()) {
-//						operationResult.addOperationResult(uri,
-//								CoreText.PushOperation_resultCancelled);
-//						continue;
-//					}
-
 					Collection<RemoteRefUpdate> refUpdates = specification.getRefUpdates(uri);
 
 					try {
@@ -179,13 +156,8 @@ public class PushOperation {
 						handleException(uri, e, e.getMessage());
 					}
 
-				} finally {
-					// Dirty trick to get things always working.
-//					subMonitor.beginTask("", WORK_UNITS_PER_TRANSPORT); //$NON-NLS-1$
-//					subMonitor.done();
-//					subMonitor.done();
-				}
-			}
+				} 
+		}
 		else {
 			try {
 				Iterable<PushResult> results = git.push().setRemote(

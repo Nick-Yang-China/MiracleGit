@@ -102,11 +102,6 @@ public class FetchOperation {
 		if (operationResult != null)
 			throw new IllegalStateException("Operation has already been executed and cannot be executed again");
 
-//		IProgressMonitor actMonitor = monitor;
-//		if (actMonitor == null)
-//			actMonitor = new NullProgressMonitor();
-//		EclipseGitProgressTransformer gitMonitor = new EclipseGitProgressTransformer(
-//				actMonitor);
 		FetchCommand command;
 		if (rc == null)
 			command = new Git(repository).fetch().setRemote(
