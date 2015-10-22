@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
@@ -27,6 +28,8 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 	private final RevCommit commit;
 
 	private final UpstreamConfig upstreamConfig;
+	
+	private boolean checkOutFlag;
 
 	/**
 	 * @param repository
@@ -94,7 +97,21 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 						throw new CoreException(e.getMessage(), e);
 					}
 				}
+				
+				if(checkOutFlag){
+					if(this.name!=null || this.commit!=null)
+					try {
+						git.checkout().setName(name).call();
+					} catch (GitAPIException e) {
+						e.printStackTrace();
+					}
+				}
+				
 			}
+
+	public void setCheckOutFlag(boolean checkOutFlag) {
+		this.checkOutFlag = checkOutFlag;
+	}
 
 	/**
 	 * Describes how to configure the upstream branch

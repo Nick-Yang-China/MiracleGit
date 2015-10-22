@@ -40,38 +40,45 @@ public class RepositoryUtil {
 
 	private  String workdirPrefix;
 	
-	private  String gitDir;
+	private  File gitDir;
 	
-	public RepositoryUtil(String gitDir) {
-		this.gitDir=gitDir;
+	public RepositoryUtil(String workDir) {
+		this(new File(workDir,Constants.DOT_GIT));
 	}
 	
 	public RepositoryUtil(File gitDir) {
-		this.gitDir=gitDir.getAbsolutePath();
+		this.gitDir=gitDir;
+		this.repository=this.createLocalRepositoryByGitDir(gitDir);
 	}
 	
-	public Repository createLocalRepositoryByGitDir(){
+	public RepositoryUtil(Repository repository) {
+		this.repository=repository;
+	}
+	
+	private Repository createLocalRepositoryByGitDir(File gitDir){
+		Repository tempRepo = null;
 		 try {
-			repository = new FileRepositoryBuilder().findGitDir().readEnvironment().setGitDir(new File(gitDir)).build();
-			
-			workdirPrefix = repository.getWorkTree().getAbsolutePath();
+			tempRepo = new FileRepositoryBuilder().findGitDir().readEnvironment().setGitDir(gitDir).build();
+			workdirPrefix = tempRepo.getWorkTree().getAbsolutePath();
 			workdirPrefix = workdirPrefix.replace('\\', '/');
 			if (!workdirPrefix.endsWith("/")) //$NON-NLS-1$
 				workdirPrefix += "/"; //$NON-NLS-1$
 			
-			if(repository.getObjectDatabase().exists()){
-				
-				 return repository; 
+			if(tempRepo.getObjectDatabase().exists()){
+				 return tempRepo; 
 			 }else{
-				 
-				 repository.create(false);
+				 tempRepo.create(false);
 			 }
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		return repository;
+		return tempRepo;
+	}
+	
+	public File getGitDir(){
+		return this.repository.getDirectory();
 	}
 
 	/**
@@ -221,7 +228,7 @@ public class RepositoryUtil {
 			return ""; //$NON-NLS-1$
 		return null;
 	}
-
+	
 	public URIish getUri() throws URISyntaxException {
 		return new URIish("file:///" + repository.getDirectory().toString());
 	}
@@ -293,60 +300,6 @@ public class RepositoryUtil {
 	}
 
 	/**
-	 * Track, add to index and finally commit given file
-	 *
-	 * @param project
-	 * @param file
-	 * @param commitMessage
-	 * @return commit object
-	 * @throws Exception
-	 */
-//	public RevCommit addAndCommit(IProject project, File file, String commitMessage)
-//			throws Exception {
-//		track(file);
-//		addToIndex(project, file);
-//
-//		return commit(commitMessage);
-//	}
-
-	/**
-	 * Appends file content to given file, then track, add to index and finally
-	 * commit it.
-	 *
-	 * @param project
-	 * @param file
-	 * @param content
-	 * @param commitMessage
-	 * @return commit object
-	 * @throws Exception
-	 */
-//	public RevCommit appendContentAndCommit(IProject project, File file,
-//			byte[] content, String commitMessage) throws Exception {
-//		return appendContentAndCommit(project, file, new String(content,
-//				"UTF-8"), commitMessage);
-//	}
-
-	/**
-	 * Appends file content to given file, then track, add to index and finally
-	 * commit it.
-	 *
-	 * @param project
-	 * @param file
-	 * @param content
-	 * @param commitMessage
-	 * @return commit object
-	 * @throws Exception
-	 */
-//	public RevCommit appendContentAndCommit(IProject project, File file,
-//			String content, String commitMessage) throws Exception {
-//		appendFileContent(file, content);
-//		track(file);
-//		addToIndex(project, file);
-//
-//		return commit(commitMessage);
-//	}
-
-	/**
 	 * Commits the current index
 	 *
 	 * @param message
@@ -386,30 +339,6 @@ public class RepositoryUtil {
 		new Git(repository).add().addFilepattern(repoPath).call();
 	}
 
-	/**
-	 * Adds all project files to version control
-	 *
-	 * @param project
-	 * @throws CoreException
-	 */
-//	public void trackAllFiles(IProject project) throws CoreException {
-//		project.accept(new IResourceVisitor() {
-//
-//			@Override
-//			public boolean visit(IResource resource) throws CoreException {
-//				if (resource instanceof IFile) {
-//					try {
-//						track(EFS.getStore(resource.getLocationURI())
-//										.toLocalFile(0, null));
-//					} catch (Exception e) {
-//						throw new CoreException(Activator.error(e.getMessage(),
-//								e));
-//					}
-//				}
-//				return true;
-//			}
-//		});
-//	}
 
 	/**
 	 * Removes file from version control
@@ -425,19 +354,6 @@ public class RepositoryUtil {
 			throw new IOException(e.getMessage());
 		}
 	}
-
-	/**
-	 * Creates a new branch and immediately checkout it.
-	 *
-	 * @param refName
-	 *            starting point for the new branch
-	 * @param newRefName
-	 * @throws Exception
-	 */
-//	public void createAndCheckoutBranch(String refName, String newRefName) throws Exception {
-//		createBranch(refName, newRefName);
-//		checkoutBranch(newRefName);
-//	}
 
 	/**
 	 * Creates a new branch
@@ -464,28 +380,5 @@ public class RepositoryUtil {
 				.setRefLogMessage("branch: Created from " + startBranch, false); //$NON-NLS-1$
 		updateRef.update();
 	}
-
-	/**
-	 * Checkouts branch
-	 *
-	 * @param refName
-	 *            full name of branch
-	 * @throws CoreException
-	 */
-//	public void checkoutBranch(String refName) throws CoreException {
-//		new BranchOperation(repository, refName).execute(null);
-//	}
-
-	/**
-	 * Adds the given file to the index
-	 *
-	 * @param project
-	 * @param file
-	 * @throws Exception
-	 */
-//	public void addToIndex(IProject project, File file) throws Exception {
-//		IFile iFile = getIFile(project, file);
-//		addToIndex(iFile);
-//	}
 
 }
