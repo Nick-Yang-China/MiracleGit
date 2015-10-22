@@ -1,24 +1,9 @@
-/*******************************************************************************
- * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2006, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2010, Jens Baumgart <jens.baumgart@sap.com>
- * Copyright (C) 2010, 2011, Mathias Kinzler <mathias.kinzler@sap.com>
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *******************************************************************************/
 package com.miracle.apps.git.core.op;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.miracle.apps.git.core.errors.CoreException;
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CheckoutResult;
@@ -27,17 +12,9 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.treewalk.AbstractTreeIterator;
-import org.eclipse.jgit.treewalk.FileTreeIterator;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
-import org.eclipse.jgit.treewalk.filter.PathSuffixFilter;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.FileUtils;
 
 /**
@@ -50,9 +27,11 @@ public class BranchOperation implements GitControlOperation {
 
 	private CheckoutResult result;
 
-	private boolean delete;
+//	private boolean delete;
 	
 	private Repository repository;
+	
+//	private List<String> pathsToHandle;
 
 	/**
 	 * Construct a {@link BranchOperation} object for a {@link Ref}.
@@ -62,23 +41,25 @@ public class BranchOperation implements GitControlOperation {
 	 *            a {@link Ref} name or {@link RevCommit} id
 	 */
 	public BranchOperation(Repository repository, String target) {
-		this(repository, target, true);
+		this.repository=repository;
+		this.target = target;
 	}
 
-	/**
-	 * Construct a {@link BranchOperation} object for a {@link Ref}.
-	 *
-	 * @param repository
-	 * @param target
-	 *            a {@link Ref} name or {@link RevCommit} id
-	 * @param delete
-	 *            true to delete missing projects on new branch, false to close
-	 *            them
-	 */
-	public BranchOperation(Repository repository, String target, boolean delete) {
-		this.target = target;
-		this.delete = delete;
-	}
+//	/**
+//	 * Construct a {@link BranchOperation} object for a {@link Ref}.
+//	 *
+//	 * @param repository
+//	 * @param target
+//	 *            a {@link Ref} name or {@link RevCommit} id
+//	 * @param delete
+//	 *            true to delete missing projects on new branch, false to close
+//	 *            them
+//	 */
+//	public BranchOperation(Repository repository, String target, boolean delete) {
+//		this.repository=repository;
+//		this.target = target;
+//		this.delete = delete;
+//	}
 
 	@Override
 	public void execute() throws CoreException {
@@ -98,19 +79,10 @@ public class BranchOperation implements GitControlOperation {
 				if (result.getStatus() == Status.NONDELETED)
 					retryDelete(result.getUndeletedList());
 
-				List<String> pathsToHandle = new ArrayList<String>();
-				pathsToHandle.addAll(co.getResult().getModifiedList());
-				pathsToHandle.addAll(co.getResult().getRemovedList());
-				pathsToHandle.addAll(co.getResult().getConflictList());
-//				IProject[] refreshProjects = ProjectUtil
-//						.getProjectsContaining(repository, pathsToHandle);
-//				ProjectUtil.refreshValidProjects(refreshProjects, delete,
-//						new SubProgressMonitor(pm, 1));
-//				pm.worked(1);
-//
-//				postExecute(pm);
-//
-//				pm.done();
+//				pathsToHandle = new ArrayList<String>();
+//				pathsToHandle.addAll(co.getResult().getModifiedList());
+//				pathsToHandle.addAll(co.getResult().getRemovedList());
+//				pathsToHandle.addAll(co.getResult().getConflictList());
 	}
 
 
