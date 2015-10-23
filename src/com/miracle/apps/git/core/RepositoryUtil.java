@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
@@ -215,7 +217,7 @@ public class RepositoryUtil {
 
 		return dc.getEntry(repoPath).getLength();
 	}
-
+	
 	public String getRepoRelativePath(String path) {
 		if(path.contains("\\")){
 			path=path.replace("\\", "/");
@@ -227,6 +229,28 @@ public class RepositoryUtil {
 		else if (path.length() == pfxLen - 1)
 			return ""; //$NON-NLS-1$
 		return null;
+	}
+
+	public Collection<String> getRepoRelativePathwithMulitPaths(Collection<String> paths) {
+		ArrayList<String> list=new ArrayList<String>();
+		if(paths!=null){
+			for(String path:paths){
+				if(path.contains("\\")){
+					path=path.replace("\\", "/");
+				}
+				final int pfxLen = workdirPrefix.length();
+				final int pLen = path.length();
+				if (pLen > pfxLen)
+					list.add(path.substring(pfxLen));
+//				else if (path.length() == pfxLen - 1)
+//					return ""; //$NON-NLS-1$
+//				}
+			}
+	            
+		}else{
+			return null;
+		}
+		return list;
 	}
 	
 	public URIish getUri() throws URISyntaxException {

@@ -55,7 +55,7 @@ public class TagOperation implements GitControlOperation {
 			Result updateResult = tagRef.update();
 
 			if (updateResult != Result.NEW && updateResult != Result.FORCED)
-				throw new CoreException("Tag "+tag.getTag()+"creation failed");
+				throw new CoreException("Tag "+tag.getTag()+"creation failed (cause: +"+updateResult.toString()+")");
 		} catch (IOException e) {
 			throw new CoreException("Tag "+tag.getTag()+"creation failed",e);
 		}
@@ -73,7 +73,7 @@ public class TagOperation implements GitControlOperation {
 			}
 			return tagId;
 		} catch (IOException e) {
-			throw new CoreException("Could not find object Id associated with tag"+tag.getTag());
+			throw new CoreException("Could not find object Id associated with tag "+tag.getTag());
 		}
 	}
 }

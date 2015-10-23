@@ -1,20 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2010, 2014 SAP AG and others.
- * Copyright (C) 2012, 2013 Tomasz Zarna <tzarna@gmail.com>
- * Copyright (C) 2014 Axel Richard <axel.richard@obeo.fr>
- * Copyright (C) 2015 Obeo
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Stefan Lay (SAP AG) - initial implementation
- *    Tomasz Zarna (IBM) - merge squash, bug 382720
- *    Axel Richard (Obeo) - merge message, bug 422886
- *    Laurent Delaigue (Obeo) - use of preferred merge strategy
- *******************************************************************************/
 package com.miracle.apps.git.core.op;
 
 import java.io.IOException;
@@ -87,8 +70,6 @@ public class MergeOperation implements GitControlOperation{
 		MergeStrategy strategy = null;
 		strategy = MergeStrategy.get(mergeStrategyName);
 		this.mergeStrategy=strategy;
-//		this.mergeStrategy = strategy != null ? strategy : Activator.getDefault()
-//				.getPreferredMergeStrategy();
 	}
 
 	/**
