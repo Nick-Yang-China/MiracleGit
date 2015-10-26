@@ -1,14 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2010, 2015 SAP AG and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Mathias Kinzler <mathias.kinzler@sap.com> - initial implementation
- *    Laurent Delaigue (Obeo) - use of preferred merge strategy
- *******************************************************************************/
 package com.miracle.apps.git.core.op;
 
 import com.miracle.apps.git.core.errors.CoreException;
@@ -42,6 +31,9 @@ public class RebaseOperation implements GitControlOperation {
 	private final InteractiveHandler handler;
 
 	private boolean preserveMerges = false;
+
+	private MergeStrategy strategy;
+
 
 	/**
 	 * Construct a {@link RebaseOperation} object for a {@link Ref}.
@@ -120,7 +112,6 @@ public class RebaseOperation implements GitControlOperation {
 
 		RebaseCommand cmd = new Git(repository).rebase()
 						.setProgressMonitor(NullProgressMonitor.INSTANCE);
-				MergeStrategy strategy =MergeStrategy.OURS; //Activator.getDefault().getPreferredMergeStrategy();
 				if (strategy != null) {
 					cmd.setStrategy(strategy);
 				}
@@ -142,20 +133,9 @@ public class RebaseOperation implements GitControlOperation {
 					throw new CoreException(e.getMessage(), e);
 				} catch (GitAPIException e) {
 					throw new CoreException(e.getMessage(), e);
-				} finally {
-//					if (refreshNeeded())
-//						ProjectUtil.refreshValidProjects(validProjects,
-//								new SubProgressMonitor(actMonitor, 1));
-				}
+				} 
 	}
 
-	private boolean refreshNeeded() {
-		if (result == null)
-			return true;
-		if (result.getStatus() == RebaseResult.Status.UP_TO_DATE)
-			return false;
-		return true;
-	}
 
 	/**
 	 * @return the result of calling {@link #execute(IProgressMonitor)}, or
@@ -185,5 +165,13 @@ public class RebaseOperation implements GitControlOperation {
 	 */
 	public void setPreserveMerges(boolean preserveMerges) {
 		this.preserveMerges = preserveMerges;
+	}
+	
+	/**
+	 * @param strategy
+	 *            to provide the MergeStrategy
+	 */
+	public void setStrategy(MergeStrategy strategy) {
+		this.strategy = strategy;
 	}
 }

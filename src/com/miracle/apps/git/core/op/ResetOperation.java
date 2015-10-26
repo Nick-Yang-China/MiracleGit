@@ -42,6 +42,5 @@ public class ResetOperation implements GitControlOperation {
 		} catch (GitAPIException e) {
 			throw new CoreException(e.getLocalizedMessage(), e.getCause());
 		}
-
 	}
 }

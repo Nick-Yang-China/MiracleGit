@@ -47,11 +47,11 @@ public class MergeOperation implements GitControlOperation{
 	 * @param refName
 	 *            name of a commit which should be merged
 	 */
-//	public MergeOperation( Repository repository,String refName) {
-//		this.repository = repository;
-//		this.refName = refName;
-//		this.mergeStrategy = Activator.getDefault().getPreferredMergeStrategy();
-//	}
+	public MergeOperation( Repository repository,String refName) {
+		this.repository = repository;
+		this.refName = refName;
+		this.mergeStrategy =null;
+	}
 
 	/**
 	 * Create a MergeOperation object
