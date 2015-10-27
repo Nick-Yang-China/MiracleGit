@@ -28,9 +28,7 @@ import com.miracle.apps.git.core.errors.CoreException;
  */
 public class CommitOperation implements GitControlOperation {
 
-	Collection<String> commitFileList;
-
-	private boolean commitWorkingDirChanges = false;
+	private Collection<String> commitFileList;
 
 	private String author;
 
@@ -51,31 +49,6 @@ public class CommitOperation implements GitControlOperation {
 	private boolean commitIndex;
 
 	private RevCommit commit = null;
-
-	/**
-	 * @param repository
-	 * @param filesToCommit
-	 *            a list of files which will be included in the commit
-	 * @param notTracked
-	 *            a list of all untracked files
-	 * @param author
-	 *            the author of the commit
-	 * @param committer
-	 *            the committer of the commit
-	 * @param message
-	 *            the commit message
-	 * @throws CoreException
-	 */
-	public CommitOperation(Collection<String> filesToCommit, Collection<String> notTracked,
-			String author, String committer, String message) throws CoreException {
-		this.author = author;
-		this.committer = committer;
-		this.message = message;
-		if (filesToCommit != null)
-			commitFileList = new HashSet<String>(filesToCommit);
-		if (notTracked != null)
-			this.notTracked = new HashSet<String>(notTracked);
-	}
 
 	/**
 	 * @param repository
@@ -137,11 +110,7 @@ public class CommitOperation implements GitControlOperation {
 				&& commitFileList.size() > 0 || commitIndex) {
 			addUntracked();
 			commit();
-		} else if (commitWorkingDirChanges) {
-			// TODO commit -a
-		} else {
-			// TODO commit
-		}
+		} 
 	}
 
 
