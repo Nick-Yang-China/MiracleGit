@@ -218,6 +218,12 @@ public class RepositoryUtil {
 		return dc.getEntry(repoPath).getLength();
 	}
 	
+	/**
+	 * get file of relative path in repo
+	 * 
+	 * @param path
+	 * @return relative path of file
+	 */
 	public String getRepoRelativePath(String path) {
 		if(path.contains("\\")){
 			path=path.replace("\\", "/");
@@ -230,7 +236,12 @@ public class RepositoryUtil {
 			return ""; //$NON-NLS-1$
 		return null;
 	}
-
+	/**
+	 * get List of relative paths in repo
+	 * 
+	 * @param paths fils absolute paths
+	 * @return list of relative paths in the repo
+	 */
 	public Collection<String> getRepoRelativePathwithMulitPaths(Collection<String> paths) {
 		ArrayList<String> list=new ArrayList<String>();
 		if(paths!=null){
@@ -316,7 +327,7 @@ public class RepositoryUtil {
 		int lastSeparator = path.lastIndexOf(File.separator);
 		FileUtils.mkdirs(new File(path.substring(0, lastSeparator)), true);
 
-		File file = new File(path);
+		File file = new File(path,name);
 		if (!file.exists())
 			FileUtils.createNewFile(file);
 

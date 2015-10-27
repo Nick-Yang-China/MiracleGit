@@ -109,8 +109,9 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 				
 			}
 
-	public void setCheckOutFlag(boolean checkOutFlag) {
+	public CreateLocalBranchOperation setCheckOutFlag(boolean checkOutFlag) {
 		this.checkOutFlag = checkOutFlag;
+		return this;
 	}
 
 	/**

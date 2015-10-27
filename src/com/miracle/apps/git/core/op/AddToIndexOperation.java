@@ -9,6 +9,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
 
 /**
+ * This class implements to add files into the Git index
  */
 public class AddToIndexOperation implements GitControlOperation{
 	private final Collection<?> rsrcList;

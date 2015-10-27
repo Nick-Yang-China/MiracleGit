@@ -44,13 +44,13 @@ public class CommitOperation implements GitControlOperation {
 
 	private Repository repo;
 
-	Collection<String> notTracked;
+	private Collection<String> notTracked;
 
 	private boolean createChangeId;
 
 	private boolean commitIndex;
 
-	RevCommit commit = null;
+	private RevCommit commit = null;
 
 	/**
 	 * @param repository
@@ -127,18 +127,6 @@ public class CommitOperation implements GitControlOperation {
 	public void setRepository(Repository repository) {
 		repo = repository;
 	}
-
-//	private Collection<String> buildFileList(Collection<File> files) throws CoreException {
-//		Collection<String> result = new HashSet<String>();
-//		for (File file : files) {
-////			RepositoryMapping mapping = RepositoryMapping.getMapping(file);
-////			if (mapping == null)
-////				throw new CoreException(Activator.error(NLS.bind(CoreText.CommitOperation_couldNotFindRepositoryMapping, file), null));
-////			String repoRelativePath = mapping.getRepoRelativePath(file);
-//			result.add(file.getPath());
-//		}
-//		return result;
-//	}
 
 	@Override
 	public void execute() throws GitAPIException {

@@ -29,7 +29,7 @@ public class FetchOperation {
 
 	private final boolean dryRun;
 
-	private FetchResult operationResult;
+	private FetchOperationResult operationResult;
 
 	private CredentialsProvider credentialsProvider;
 
@@ -101,7 +101,6 @@ public class FetchOperation {
 	public void run() throws InvocationTargetException {
 		if (operationResult != null)
 			throw new IllegalStateException("Operation has already been executed and cannot be executed again");
-
 		FetchCommand command;
 		if (rc == null)
 			command = new Git(repository).fetch().setRemote(
@@ -113,7 +112,8 @@ public class FetchOperation {
 		if (tagOpt != null)
 			command.setTagOpt(tagOpt);
 		try {
-			operationResult = command.call();
+			FetchResult result=command.call();
+			operationResult=new FetchOperationResult(result.getURI(), result);
 		} catch (JGitInternalException e) {
 			throw new InvocationTargetException(e.getCause() != null ? e
 					.getCause() : e);
@@ -126,7 +126,7 @@ public class FetchOperation {
 	 * @return the result, or <code>null</code> if the operation has not been
 	 *         executed
 	 */
-	public FetchResult getOperationResult() {
+	public FetchOperationResult getOperationResult() {
 		return operationResult;
 	}
 }

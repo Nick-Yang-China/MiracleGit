@@ -1,8 +1,5 @@
 package com.miracle.apps.git.core.op;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 import com.miracle.apps.git.core.errors.CoreException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullCommand;
@@ -21,9 +18,9 @@ import org.eclipse.jgit.transport.CredentialsProvider;
  */
 public class PullOperation implements GitControlOperation{
 	
-	private final Repository[] repositories;
+	private final Repository repository;
 
-	private final Map<Repository, Object> results = new LinkedHashMap<Repository, Object>();
+	private PullResult pullResult;
 
 	private final int timeout;
 
@@ -31,55 +28,60 @@ public class PullOperation implements GitControlOperation{
 	
 	private MergeStrategy strategy;
 
+	private boolean useRebase;
+
+	private String remoteBranchName;
+
 	/**
 	 * @param repositories
 	 *            the repository
 	 * @param timeout
 	 *            in seconds
+	 *@param  remoteBranchName
+	 *			  The remote branch name to be used for the pull operation
 	 */
-	public PullOperation(Set<Repository> repositories, int timeout) {
+	public PullOperation(Repository repository, int timeout, String remoteBranchName) {
 		this.timeout = timeout;
-		this.repositories = repositories.toArray(new Repository[repositories
-				.size()]);
+		this.repository = repository;
+		this.remoteBranchName=remoteBranchName;
 	}
 
 	@Override
-	public void execute() throws CoreException {
-		if (!results.isEmpty())
+	public void execute() throws CoreException, DetachedHeadException, InvalidConfigurationException {
+		if (pullResult!=null)
 			throw new CoreException("Operation has already been executed and cannot be executed again");
 				
-		for (int i = 0; i < repositories.length; i++) {
-					Repository repository = repositories[i];
 					PullCommand pull = new Git(repository).pull();
-					PullResult pullResult = null;
+					
 					try {
 						pull.setTimeout(timeout);
 						pull.setCredentialsProvider(credentialsProvider);
+						pull.setRebase(useRebase);
+						if(remoteBranchName!=null)
+							pull.setRemoteBranchName(remoteBranchName);
 						if (strategy != null) {
 							pull.setStrategy(strategy);
 						}
 						pullResult = pull.call();
-						results.put(repository, pullResult);
 					} catch (DetachedHeadException e) {
-						results.put(repository, "No local branch is currently checked out");
+						throw new DetachedHeadException("No local branch is currently checked out");
 					} catch (InvalidConfigurationException e) {
-						results.put(repository, "The current branch is not configured for pull");
+						throw new InvalidConfigurationException("The current branch is not configured for pull");
 					} catch (GitAPIException e) {
-						results.put(repository,e.getMessage());
+						throw new CoreException(e.getMessage());
 					} catch (JGitInternalException e) {
 						Throwable cause = e.getCause();
 						if (cause == null || !(cause instanceof TransportException))
 							cause = e;
-						results.put(repository,cause.getMessage());
+						throw new CoreException(e.getMessage(), cause);
 					} 
-				}
 	}
 
 	/**
-	 * @return the results, or an empty Map if this has not been executed
+	 * @return the PullResult
 	 */
-	public Map<Repository, Object> getResults() {
-		return this.results;
+	public PullResult getPullResult() {
+		return this.pullResult;
 	}
 
 	/**
@@ -102,5 +104,9 @@ public class PullOperation implements GitControlOperation{
 
 	public MergeStrategy getStrategy() {
 		return strategy;
+	}
+	
+	public void setUseRebase(boolean useRebase) {
+		this.useRebase = useRebase;
 	}
 }
