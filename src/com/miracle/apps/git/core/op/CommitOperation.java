@@ -49,6 +49,32 @@ public class CommitOperation implements GitControlOperation {
 	private boolean commitIndex;
 
 	private RevCommit commit = null;
+	
+	/**
+	 * @param repository
+	 * @param filesToCommit
+	 *            a list of files which will be included in the commit
+	 * @param notTracked
+	 *            a list of all untracked files
+	 * @param author
+	 *            the author of the commit
+	 * @param committer
+	 *            the committer of the commit
+	 * @param message
+	 *            the commit message
+	 * @throws CoreException
+	 */
+	@Deprecated
+	public CommitOperation(Collection<String> filesToCommit, Collection<String> notTracked,
+			String author, String committer, String message) throws CoreException {
+		this.author = author;
+		this.committer = committer;
+		this.message = message;
+		if (filesToCommit != null)
+			commitFileList = new HashSet<String>(filesToCommit);
+		if (notTracked != null)
+			this.notTracked = new HashSet<String>(notTracked);
+	}
 
 	/**
 	 * @param repository
@@ -93,13 +119,6 @@ public class CommitOperation implements GitControlOperation {
 		this.commitIndex = true;
 	}
 
-
-	/**
-	 * @param repository
-	 */
-	public void setRepository(Repository repository) {
-		repo = repository;
-	}
 
 	@Override
 	public void execute() throws GitAPIException {
@@ -175,6 +194,7 @@ public class CommitOperation implements GitControlOperation {
 	public void setComputeChangeId(boolean createChangeId) {
 		this.createChangeId = createChangeId;
 	}
+	
 
 	/**
 	 * @return the newly created commit if committing was successful, null otherwise.
@@ -183,7 +203,6 @@ public class CommitOperation implements GitControlOperation {
 		return commit;
 	}
 
-	// TODO: can the commit message be change by the user in case of a merge commit?
 	private void commitAll() throws CoreException {
 
 		Git git = new Git(repo);
