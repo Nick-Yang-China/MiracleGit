@@ -27,7 +27,7 @@ public class TagOperation implements GitControlOperation {
 	 *
 	 * @param repo
 	 * @param tag
-	 * @param shouldMoveTag if <code>true</code> it will replace tag with same name
+	 * @param shouldMoveTag if <code>true</code> it will replace existing tag with same name
 	 */
 	public TagOperation(Repository repo, TagBuilder tag, boolean shouldMoveTag) {
 		this.tag = tag;
@@ -57,7 +57,7 @@ public class TagOperation implements GitControlOperation {
 			if (updateResult != Result.NEW && updateResult != Result.FORCED)
 				throw new CoreException("Tag "+tag.getTag()+"creation failed (cause: +"+updateResult.toString()+")");
 		} catch (IOException e) {
-			throw new CoreException("Tag "+tag.getTag()+"creation failed",e);
+			throw new CoreException("Tag "+tag.getTag()+" creation failed",e);
 		}
 	}
 

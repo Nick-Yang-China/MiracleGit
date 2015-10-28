@@ -1,9 +1,5 @@
 package com.miracle.apps.git.core.op;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -13,12 +9,9 @@ import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.util.RawParseUtils;
 
 import com.miracle.apps.git.core.errors.CoreException;
@@ -51,7 +44,6 @@ public class CommitOperation implements GitControlOperation {
 	private RevCommit commit = null;
 	
 	/**
-	 * @param repository
 	 * @param filesToCommit
 	 *            a list of files which will be included in the commit
 	 * @param notTracked
@@ -119,6 +111,14 @@ public class CommitOperation implements GitControlOperation {
 		this.commitIndex = true;
 	}
 
+
+	/**
+	 * @param repository
+	 */
+	@Deprecated
+	public void setRepository(Repository repository) {
+		this.repo = repository;
+	}
 
 	@Override
 	public void execute() throws GitAPIException {
