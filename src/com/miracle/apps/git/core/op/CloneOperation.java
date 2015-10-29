@@ -2,13 +2,12 @@ package com.miracle.apps.git.core.op;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -21,7 +20,7 @@ import com.miracle.apps.git.core.errors.CoreException;
 /**
  * Clones a repository from a remote location to a local location.
  */
-public class CloneOperation {
+public class CloneOperation implements GitControlOperation {
 	private final URIish uri;
 
 	private final boolean allSelected;
@@ -135,16 +134,17 @@ public class CloneOperation {
 		this.cloneSubmodules = cloneSubmodules;
 	}
 
+
 	/**
-	 * @param pm
-	 *            the monitor to be used for reporting progress and responding
-	 *            to cancellation. The monitor is never <code>null</code>
-	 * @throws InvocationTargetException
-	 * @throws InterruptedException
-	 * @throws CoreException 
+	 * @return The git directory which will contain the repository
 	 */
-	public void run()
-			throws InvocationTargetException, InterruptedException, CoreException {
+	public File getGitDir() {
+		return gitdir;
+	}
+
+
+	@Override
+	public void execute() throws GitAPIException {
 		Repository repository = null;
 		try {
 			CloneCommand cloneRepository = Git.cloneRepository();
@@ -178,12 +178,5 @@ public class CloneOperation {
 		} finally {
 				repository.close();
 		}
-	}
-
-	/**
-	 * @return The git directory which will contain the repository
-	 */
-	public File getGitDir() {
-		return gitdir;
 	}
 }

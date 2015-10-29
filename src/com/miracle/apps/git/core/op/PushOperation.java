@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.lib.NullProgressMonitor;
 import org.eclipse.jgit.lib.Repository;
@@ -16,11 +17,12 @@ import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
 
+import com.miracle.apps.git.core.errors.CoreException;
+
 /**
  * Push operation: pushing from local repository to one or many remote ones.
  */
-public class PushOperation {
-	private static final int WORK_UNITS_PER_TRANSPORT = 10;
+public class PushOperation implements GitControlOperation{
 
 	private final Repository localDb;
 
@@ -112,14 +114,32 @@ public class PushOperation {
 		return specification;
 	}
 
-	/**
-	 * @throws InvocationTargetException
-	 *             not really used: failure is communicated via the result (see
-	 *             {@link #getOperationResult()})
-	 */
-	public void run()
-			throws InvocationTargetException {
+	private URIish getPushURIForErrorHandling() {
+		RemoteConfig rc = null;
+		try {
+			rc = new RemoteConfig(localDb.getConfig(), remoteName);
+			return rc.getPushURIs().isEmpty() ? rc.getURIs().get(0) : rc
+					.getPushURIs().get(0);
+		} catch (URISyntaxException e) {
+			// should not happen
+			return null;
+		}
+	}
 
+	/**
+	 * Sets the output stream this operation will write sideband messages to.
+	 *
+	 * @param out
+	 *            the outputstream to write to
+	 * @since 3.0
+	 */
+	public void setOutputStream(OutputStream out) {
+		this.out = out;
+	}
+
+	@Override
+	public void execute() throws GitAPIException {
+		// TODO Auto-generated method stub
 		if (operationResult != null)
 			throw new IllegalStateException("Operation has already been executed and cannot be executed again");
 
@@ -151,9 +171,11 @@ public class PushOperation {
 						String errorMessage = e.getCause() != null ? e
 								.getCause().getMessage() : e.getMessage();
 						String userMessage = "An internal Exception occurred during push: "+errorMessage;
-						handleException(uri, e, userMessage);
+						operationResult.addOperationResult(uri, userMessage);
+						throw new CoreException(userMessage, e);
 					} catch (Exception e) {
-						handleException(uri, e, e.getMessage());
+						operationResult.addOperationResult(uri, e.getMessage());
+						throw new CoreException(e.getMessage(), e);
 					}
 
 				} 
@@ -172,47 +194,13 @@ public class PushOperation {
 						.getMessage() : e.getMessage();
 				String userMessage = "An internal Exception occurred during push: "+errorMessage;
 				URIish uri = getPushURIForErrorHandling();
-				handleException(uri, e, userMessage);
+				operationResult.addOperationResult(uri, userMessage);
+				throw new CoreException(userMessage, e);
 			} catch (Exception e) {
 				URIish uri = getPushURIForErrorHandling();
-				handleException(uri, e, e.getMessage());
+				operationResult.addOperationResult(uri, e.getMessage());
+				throw new CoreException(e.getMessage(), e);
 			}
 		}
-	}
-
-	private void handleException(final URIish uri, Exception e,
-			String userMessage) {
-		String uriString;
-		if (uri != null) {
-			operationResult.addOperationResult(uri, userMessage);
-			uriString = uri.toString();
-		} else
-			uriString = "retrieving URI failed"; //$NON-NLS-1$
-
-		String userMessageForUri ="An exception occurred during push on URI"+userMessage;
-	}
-
-	private URIish getPushURIForErrorHandling() {
-		RemoteConfig rc = null;
-		try {
-			rc = new RemoteConfig(localDb.getConfig(), remoteName);
-			return rc.getPushURIs().isEmpty() ? rc.getURIs().get(0) : rc
-					.getPushURIs().get(0);
-		} catch (URISyntaxException e) {
-			// should not happen
-//			Activator.logError("Reading RemoteConfig failed", e); //$NON-NLS-1$
-			return null;
-		}
-	}
-
-	/**
-	 * Sets the output stream this operation will write sideband messages to.
-	 *
-	 * @param out
-	 *            the outputstream to write to
-	 * @since 3.0
-	 */
-	public void setOutputStream(OutputStream out) {
-		this.out = out;
 	}
 }

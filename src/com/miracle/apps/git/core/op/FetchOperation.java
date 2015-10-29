@@ -1,9 +1,9 @@
 package com.miracle.apps.git.core.op;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.CredentialsProvider;
@@ -13,10 +13,12 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.TagOpt;
 import org.eclipse.jgit.transport.URIish;
 
+import com.miracle.apps.git.core.errors.CoreException;
+
 /**
  * Used to fetch from another Repository
  */
-public class FetchOperation {
+public class FetchOperation implements GitControlOperation {
 	private final Repository repository;
 
 	private final RemoteConfig rc;
@@ -95,10 +97,15 @@ public class FetchOperation {
 	}
 
 	/**
-	 * @param monitor
-	 * @throws InvocationTargetException
+	 * @return the result, or <code>null</code> if the operation has not been
+	 *         executed
 	 */
-	public void run() throws InvocationTargetException {
+	public FetchOperationResult getOperationResult() {
+		return operationResult;
+	}
+
+	@Override
+	public void execute() throws GitAPIException {
 		if (operationResult != null)
 			throw new IllegalStateException("Operation has already been executed and cannot be executed again");
 		FetchCommand command;
@@ -115,18 +122,9 @@ public class FetchOperation {
 			FetchResult result=command.call();
 			operationResult=new FetchOperationResult(result.getURI(), result);
 		} catch (JGitInternalException e) {
-			throw new InvocationTargetException(e.getCause() != null ? e
-					.getCause() : e);
+			throw new CoreException(e.getMessage());
 		} catch (Exception e) {
-			throw new InvocationTargetException(e);
+			throw new CoreException(e.getMessage());
 		}
-	}
-
-	/**
-	 * @return the result, or <code>null</code> if the operation has not been
-	 *         executed
-	 */
-	public FetchOperationResult getOperationResult() {
-		return operationResult;
 	}
 }

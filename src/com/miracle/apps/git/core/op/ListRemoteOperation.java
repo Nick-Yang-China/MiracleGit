@@ -1,6 +1,5 @@
 package com.miracle.apps.git.core.op;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LsRemoteCommand;
@@ -10,14 +9,26 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.URIish;
+import com.miracle.apps.git.core.errors.CoreException;
 
 /**
  * Operation of listing remote repository advertised refs.
  */
-public class ListRemoteOperation {
-	private final LsRemoteCommand rc;
-
+public class ListRemoteOperation implements GitControlOperation {
+	private final Repository localDb;
+	
+	private final URIish uri;
+	
+	private final int timeout;
+	
+	private boolean heads;
+	
 	private Collection<Ref> remoteRefs;
+	
+	private CredentialsProvider credentialsProvider;
+
+	private boolean tags;
+
 
 	/**
 	 * Create listing operation for specified local repository (needed by
@@ -32,10 +43,10 @@ public class ListRemoteOperation {
 	 *            timeout is seconds; 0 means no timeout
 	 */
 	public ListRemoteOperation(final Repository localDb, final URIish uri,
-			int timeout) {
-		Git git = new Git(localDb);
-		rc = git.lsRemote();
-		rc.setRemote(uri.toString()).setTimeout(timeout);
+			final int timeout) {
+		this.localDb=localDb;
+		this.uri=uri;
+		this.timeout=timeout;
 	}
 
 	/**
@@ -68,25 +79,15 @@ public class ListRemoteOperation {
 	 * @param credentialsProvider
 	 */
 	public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
-		rc.setCredentialsProvider(credentialsProvider);
+		this.credentialsProvider=credentialsProvider;
 	}
 
-	/**
-	 * @param pm
-	 *            the monitor to be used for reporting progress and responding
-	 *            to cancellation. The monitor is never <code>null</code>
-	 * @throws InvocationTargetException
-	 * @throws InterruptedException
-	 */
-	public void run() throws InvocationTargetException,
-			InterruptedException {
-		try {
-			remoteRefs = rc.call();
-		} catch (JGitInternalException e) {
-			throw new InvocationTargetException(e);
-		} catch (GitAPIException e) {
-			throw new InvocationTargetException(e);
-		}
+	public void setHeads(boolean heads) {
+		this.heads = heads;
+	}
+
+	public void setTags(boolean tags) {
+		this.tags = tags;
 	}
 
 	private void checkState() {
@@ -94,5 +95,22 @@ public class ListRemoteOperation {
 			throw new IllegalStateException(
 					"Error occurred during remote repo " +  //$NON-NLS-1$
 					"listing, no refs available"); //$NON-NLS-1$
+	}
+
+	@Override
+	public void execute() throws GitAPIException {
+		// TODO Auto-generated method stub
+		try {
+			Git git = new Git(localDb);
+			LsRemoteCommand rc = git.lsRemote();
+			rc.setCredentialsProvider(credentialsProvider);
+			rc.setRemote(uri.toString()).setTimeout(timeout);
+			rc.setHeads(heads).setTags(tags);
+			remoteRefs = rc.call();
+		} catch (JGitInternalException e) {
+			throw new CoreException(e.getMessage());
+		} catch (GitAPIException e) {
+			throw new CoreException(e.getMessage());
+		}
 	}
 }

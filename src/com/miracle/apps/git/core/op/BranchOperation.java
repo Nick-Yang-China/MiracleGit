@@ -26,12 +26,9 @@ public class BranchOperation implements GitControlOperation {
 	private final String target;
 
 	private CheckoutResult result;
-
-//	private boolean delete;
 	
 	private Repository repository;
 	
-//	private List<String> pathsToHandle;
 
 	/**
 	 * Construct a {@link BranchOperation} object for a {@link Ref}.
@@ -74,7 +71,7 @@ public class BranchOperation implements GitControlOperation {
 				} catch (GitAPIException e) {
 					throw new CoreException(e.getMessage(), e);
 				} finally {
-					BranchOperation.this.result = co.getResult();
+					this.result = co.getResult();
 				}
 				if (result.getStatus() == Status.NONDELETED)
 					retryDelete(result.getUndeletedList());
@@ -93,7 +90,7 @@ public class BranchOperation implements GitControlOperation {
 		return result;
 	}
 
-	void retryDelete(List<String> pathList) {
+	private void retryDelete(List<String> pathList) {
 		// try to delete, but for a short time only
 		long startTime = System.currentTimeMillis();
 		for (String path : pathList) {
