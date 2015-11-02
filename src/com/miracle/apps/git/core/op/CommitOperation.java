@@ -65,7 +65,8 @@ public class CommitOperation implements GitControlOperation {
 
 	private RevCommit commit = null;
 	
-	private static List<String> only = new ArrayList<String>();
+	private boolean ifNoChanges=false;
+	
 	/**
 	 * @param filesToCommit
 	 *            a list of files which will be included in the commit
@@ -191,12 +192,20 @@ public class CommitOperation implements GitControlOperation {
 					commitCommand.setOnly(path);
 			commit = commitCommand.call();
 		} catch (JGitInternalException e) {
-			System.out.println(JGitText.get().emptyCommit);
-//			throw new JGitInternalException(JGitText.get().emptyCommit);
+			if("No changes".equals(JGitText.get().emptyCommit)){
+				ifNoChanges=true;
+			}
 		} catch (Exception e) {
 			throw new CoreException("An internal error occurred", e);
 		}
 	}
+	
+	
+	
+	public boolean isIfNoChanges() {
+		return ifNoChanges;
+	}
+
 	/**
 	 *
 	 * @param amending
@@ -263,112 +272,4 @@ public class CommitOperation implements GitControlOperation {
 		commitCommand.setCommitter(committerIdent);
 	}
 	
-	/**
-	 * 
-	 * @param repository
-	 * @return true means the commit have no changes, can't commit it
-	 * @throws IOException 
-	 * @throws IncorrectObjectTypeException 
-	 * @throws AmbiguousObjectException 
-	 * @throws RevisionSyntaxException 
-	 */
-	public static boolean CheckIfNoChangesBeforeCommit(Repository repo) throws RevisionSyntaxException, AmbiguousObjectException, IncorrectObjectTypeException, IOException{
-		boolean emptyCommit = true;
-		try (RevWalk rw = new RevWalk(repo)) {
-				// determine the current HEAD and the commit it is referring to
-				ObjectId headId = repo.resolve(Constants.HEAD + "^{commit}"); //$NON-NLS-1$
-				// lock the index
-				DirCache index = repo.lockDirCache();
-				
-				ObjectInserter inserter = null;
-
-				// get DirCacheBuilder for existing index
-				DirCacheBuilder existingBuilder = index.builder();
-
-				// get DirCacheBuilder for newly created in-core index to build a
-				// temporary index for this commit
-				DirCache inCoreIndex = DirCache.newInCore();
-				DirCacheBuilder tempBuilder = inCoreIndex.builder();
-
-			try (TreeWalk treeWalk = new TreeWalk(repo)) {
-				int dcIdx = treeWalk
-						.addTree(new DirCacheBuildIterator(existingBuilder));
-				int fIdx = treeWalk.addTree(new FileTreeIterator(repo));
-				int hIdx = -1;
-				if (headId != null)
-					hIdx = treeWalk.addTree(rw.parseTree(headId));
-				treeWalk.setRecursive(true);
-
-				while (treeWalk.next()) {
-					String path = treeWalk.getPathString();
-					// check if current entry's path matches a specified path
-					int pos = lookupOnly(path);
-
-					CanonicalTreeParser hTree = null;
-					if (hIdx != -1)
-						hTree = treeWalk.getTree(hIdx, CanonicalTreeParser.class);
-
-					DirCacheIterator dcTree = treeWalk.getTree(dcIdx,
-							DirCacheIterator.class);
-
-					if (pos >= 0) {
-						// include entry in commit
-
-						FileTreeIterator fTree = treeWalk.getTree(fIdx,
-								FileTreeIterator.class);
-
-						// check if entry refers to a tracked file
-						boolean tracked = dcTree != null || hTree != null;
-						if (!tracked)
-							continue;
-
-							if (emptyCommit
-										&& (hTree == null || !hTree.idEqual(fTree)
-												|| hTree.getEntryRawMode() != fTree
-														.getEntryRawMode()))
-									// this is a change
-									emptyCommit = false;
-							} else {
-								// if no file exists on disk, neither add it to
-								// index nor to temporary in-core index
-	
-								if (emptyCommit && hTree != null)
-									// this is a change
-									emptyCommit = false;
-							}
-
-					}
-				}finally {
-					index.unlock();
-				}
-			}
-		
-		return emptyCommit;
-	}
-	
-	/**
-	 * Look an entry's path up in the list of paths specified by the --only/ -o
-	 * option
-	 *
-	 * In case the complete (file) path (e.g. "d1/d2/f1") cannot be found in
-	 * <code>only</code>, lookup is also tried with (parent) directory paths
-	 * (e.g. "d1/d2" and "d1").
-	 *
-	 * @param pathString
-	 *            entry's path
-	 * @return the item's index in <code>only</code>; -1 if no item matches
-	 */
-	private static int lookupOnly(String pathString) {
-		String p = pathString;
-		while (true) {
-			int position = Collections.binarySearch(only, p);
-			if (position >= 0)
-				return position;
-			int l = p.lastIndexOf("/"); //$NON-NLS-1$
-			if (l < 1)
-				break;
-			p = p.substring(0, l);
-		}
-		return -1;
-	}
 }
