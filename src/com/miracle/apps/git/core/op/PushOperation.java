@@ -1,9 +1,9 @@
 package com.miracle.apps.git.core.op;
 
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.List;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -11,6 +11,7 @@ import org.eclipse.jgit.lib.NullProgressMonitor;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
@@ -40,6 +41,8 @@ public class PushOperation implements GitControlOperation{
 
 	private CredentialsProvider credentialsProvider;
 
+	private List<RefSpec> specs;
+
 	/**
 	 * Create push operation for provided specification.
 	 *
@@ -57,7 +60,7 @@ public class PushOperation implements GitControlOperation{
 	public PushOperation(final Repository localDb,
 			final PushOperationSpecification specification,
 			final boolean dryRun, int timeout) {
-		this(localDb, null, specification, dryRun, timeout);
+		this(localDb, null, specification,null, dryRun, timeout);
 	}
 
 	/**
@@ -65,22 +68,25 @@ public class PushOperation implements GitControlOperation{
 	 *
 	 * @param localDb
 	 * @param remoteName
+	 * @param specs
+	 * 			 The ref specs to be used in the push operation
 	 * @param dryRun
 	 * @param timeout
 	 */
-	public PushOperation(final Repository localDb, final String remoteName,
+	public PushOperation(final Repository localDb, final String remoteName,List<RefSpec> specs,
 			final boolean dryRun, int timeout) {
-		this(localDb, remoteName, null, dryRun, timeout);
+		this(localDb, remoteName, null,specs, dryRun, timeout);
 	}
 
 	private PushOperation(final Repository localDb, final String remoteName,
-			PushOperationSpecification specification, final boolean dryRun,
+			PushOperationSpecification specification,List<RefSpec> specs, final boolean dryRun,
 			int timeout) {
 		this.localDb = localDb;
 		this.specification = specification;
 		this.dryRun = dryRun;
 		this.remoteName = remoteName;
 		this.timeout = timeout;
+		this.specs=specs;
 	}
 
 	/**
@@ -139,7 +145,6 @@ public class PushOperation implements GitControlOperation{
 
 	@Override
 	public void execute() throws GitAPIException {
-		// TODO Auto-generated method stub
 		if (operationResult != null)
 			throw new IllegalStateException("Operation has already been executed and cannot be executed again");
 
@@ -184,8 +189,8 @@ public class PushOperation implements GitControlOperation{
 			try {
 				Iterable<PushResult> results = git.push().setRemote(
 						remoteName).setDryRun(dryRun).setTimeout(timeout)
-						.setProgressMonitor(NullProgressMonitor.INSTANCE).setCredentialsProvider(credentialsProvider)
-						.setOutputStream(out).call();
+						.setCredentialsProvider(credentialsProvider)
+						.setOutputStream(out).setRefSpecs(specs).call();
 				for (PushResult result : results) {
 					operationResult.addOperationResult(result.getURI(), result);
 				}
