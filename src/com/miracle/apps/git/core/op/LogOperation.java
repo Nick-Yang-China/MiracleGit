@@ -14,7 +14,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 /**
  * Operation that gets the commit history
  */
-public class CommitHistoryOperation implements GitControlOperation {
+public class LogOperation implements GitControlOperation {
 
 	private final Repository repository;
 
@@ -27,7 +27,7 @@ public class CommitHistoryOperation implements GitControlOperation {
 	private int maxCount;
 	
 	
-	public CommitHistoryOperation(final Repository repository){
+	public LogOperation(final Repository repository){
 		this.repository = repository;
 		this.path = null;
 		this.start=null;
@@ -39,7 +39,7 @@ public class CommitHistoryOperation implements GitControlOperation {
 	 * @param repository
 	 * @param path
 	 */
-	public CommitHistoryOperation(final Repository repository, final String path) {
+	public LogOperation(final Repository repository, final String path) {
 		this.repository = repository;
 		this.path = path;
 		this.start=null;
@@ -51,7 +51,7 @@ public class CommitHistoryOperation implements GitControlOperation {
 	 * @param repository
 	 * @param start
 	 */
-	public CommitHistoryOperation(final Repository repository, final AnyObjectId start) {
+	public LogOperation(final Repository repository, final AnyObjectId start) {
 		this.repository = repository;
 		this.start = start;
 		this.path=null;
