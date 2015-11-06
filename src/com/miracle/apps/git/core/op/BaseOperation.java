@@ -50,7 +50,7 @@ abstract class BaseOperation implements GitControlOperation {
 	 * @param task
 	 *            to be performed before execution
 	 */
-	public synchronized void addPreExecuteTask(final PreExecuteTask task) {
+	public synchronized void addPreExecuteTask(PreExecuteTask task) {
 		if (preTasks == null)
 			preTasks = new ArrayList<PreExecuteTask>();
 		preTasks.add(task);
