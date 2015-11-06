@@ -489,6 +489,7 @@ public class RepositoryUtil {
 	 * @param content
 	 * @throws IOException
 	 */
+	@Deprecated
 	public void appendFileContent(File file, byte[] content) throws IOException {
 		appendFileContent(file, new String(content, "UTF-8"), true);
 	}
@@ -500,6 +501,7 @@ public class RepositoryUtil {
 	 * @param content
 	 * @throws IOException
 	 */
+	@Deprecated
 	public void appendFileContent(File file, String content) throws IOException {
 		appendFileContent(file, content, true);
 	}
@@ -514,6 +516,7 @@ public class RepositoryUtil {
 	 *            rather than the beginning
 	 * @throws IOException
 	 */
+	@Deprecated
 	public void appendFileContent(File file, byte[] content, boolean append)
 			throws IOException {
 		appendFileContent(file, new String(content, "UTF-8"), append);
@@ -529,6 +532,7 @@ public class RepositoryUtil {
 	 *            rather than the beginning
 	 * @throws IOException
 	 */
+	@Deprecated
 	public void appendFileContent(File file, String content, boolean append)
 			throws IOException {
 		Writer fw = null;
@@ -543,7 +547,7 @@ public class RepositoryUtil {
 	}
 
 
-
+	@Deprecated
 	public boolean removedFromIndex(String absolutePath) throws IOException {
 		DirCacheEntry dc = getDirCacheEntry(absolutePath);
 		if (dc == null)
@@ -570,6 +574,7 @@ public class RepositoryUtil {
 	 * @throws GitAPIException
 	 * @throws NoFilepatternException
 	 */
+	@Deprecated
 	public RevCommit createInitialCommit(String message) throws IOException,
 			JGitInternalException, NoFilepatternException, GitAPIException {
 		String repoPath = repository.getWorkTree().getAbsolutePath();
@@ -590,6 +595,7 @@ public class RepositoryUtil {
 	 * @return nearly created file
 	 * @throws IOException
 	 */
+	@Deprecated
 	public File createFile(File project, String name) throws IOException {
 		String path = project.getAbsolutePath();
 		int lastSeparator = path.lastIndexOf(File.separator);
@@ -617,6 +623,7 @@ public class RepositoryUtil {
 	 * @throws GitAPIException
 	 * @throws WrongRepositoryStateException
 	 */
+	@Deprecated
 	public RevCommit commit(String message) throws NoHeadException,
 			NoMessageException, UnmergedPathException,
 			ConcurrentRefUpdateException, JGitInternalException,
@@ -638,6 +645,7 @@ public class RepositoryUtil {
 	 * @throws GitAPIException
 	 * @throws NoFilepatternException
 	 */
+	@Deprecated
 	public void track(File file) throws IOException, NoFilepatternException, GitAPIException {
 		String repoPath = getRepoRelativePath(file.getPath());
 		new Git(repository).add().addFilepattern(repoPath).call();
@@ -650,6 +658,7 @@ public class RepositoryUtil {
 	 * @param file
 	 * @throws IOException
 	 */
+	@Deprecated
 	public void untrack(File file) throws IOException {
 		String repoPath = getRepoRelativePath(file.getPath());
 		try {
@@ -667,6 +676,7 @@ public class RepositoryUtil {
 	 * @param newRefName
 	 * @throws IOException
 	 */
+	@Deprecated
 	public void createBranch(String refName, String newRefName)
 			throws IOException {
 		RefUpdate updateRef;
