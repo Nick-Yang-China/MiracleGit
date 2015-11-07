@@ -23,11 +23,11 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 
 	private final Repository repository;
 
-	private final Ref ref;
+	private final String baseBranchName;
 
 	private final RevCommit commit;
 
-	private final UpstreamConfig upstreamConfig;
+	private UpstreamConfig upstreamConfig;
 	
 	private boolean checkOutFlag;
 
@@ -44,9 +44,27 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 			Ref ref, UpstreamConfig config) {
 		this.name = name;
 		this.repository = repository;
-		this.ref = ref;
+		this.baseBranchName = ref.getName();
 		this.commit = null;
 		this.upstreamConfig = config;
+	}
+	
+	/**
+	 * @param repository
+	 * @param name
+	 *            the name for the new local branch (without prefix)
+	 * @param ref
+	 *            the branch or tag to base the new branch upon
+	 * @param config
+	 *            how to do the upstream configuration
+	 * @throws IOException 
+	 */
+	public CreateLocalBranchOperation(Repository repository, String newname,
+			String basebranchname) throws IOException {
+		this.name = newname;
+		this.repository = repository;
+		this.baseBranchName = basebranchname;
+		this.commit = null;
 	}
 
 	/**
@@ -60,7 +78,7 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 			RevCommit commit) {
 		this.name = name;
 		this.repository = repository;
-		this.ref = null;
+		this.baseBranchName = null;
 		this.commit = commit;
 		this.upstreamConfig = null;
 	}
@@ -69,14 +87,14 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 	public void execute() throws CoreException {
 				Git git = new Git(repository);
 				try {
-					if (ref != null) {
+					if (baseBranchName != null) {
 						SetupUpstreamMode mode;
 						if (upstreamConfig == UpstreamConfig.NONE)
 							mode = SetupUpstreamMode.NOTRACK;
 						else
 							mode = SetupUpstreamMode.SET_UPSTREAM;
 						git.branchCreate().setName(name).setStartPoint(
-								ref.getName()).setUpstreamMode(mode).call();
+								baseBranchName).setUpstreamMode(mode).call();
 					}
 					else
 						git.branchCreate().setName(name).setStartPoint(commit)
@@ -164,4 +182,9 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 			return MERGE;
 		}
 	}
+	
+	public void setUpstreamConfig(UpstreamConfig upstreamConfig) {
+		this.upstreamConfig = upstreamConfig;
+	}
+
 }

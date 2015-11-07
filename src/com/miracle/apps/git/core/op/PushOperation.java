@@ -99,6 +99,12 @@ public class PushOperation implements GitControlOperation{
 	}
 
 	/**
+	 * @param credentialsProvider
+	 */
+	public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
+			this.credentialsProvider = credentialsProvider;
+	}
+	/**
 	 * @return the operation's credentials provider
 	 */
 	public CredentialsProvider getCredentialsProvider() {
