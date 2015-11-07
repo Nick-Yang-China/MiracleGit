@@ -17,6 +17,7 @@ import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import com.miracle.apps.git.core.errors.CoreException;
 
@@ -92,8 +93,9 @@ public class PushOperation implements GitControlOperation{
 	/**
 	 * @param credentialsProvider
 	 */
-	public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
-		this.credentialsProvider = credentialsProvider;
+	public void setCredentialsProvider(String username,String password) {
+		if(username!=null && password !=null)
+			this.credentialsProvider = new UsernamePasswordCredentialsProvider(username,password);
 	}
 
 	/**
