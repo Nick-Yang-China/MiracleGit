@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.miracle.apps.git.core.errors.CoreException;
 
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -21,6 +22,7 @@ public class TagOperation implements GitControlOperation {
 	private final TagBuilder tag;
 	private final Repository repo;
 	private final boolean shouldMoveTag;
+	private Result updateResult;
 
 	/**
 	 * Construct TagOperation
@@ -52,7 +54,7 @@ public class TagOperation implements GitControlOperation {
 			tagRef.setNewObjectId(tagId);
 
 			tagRef.setForceUpdate(shouldMoveTag);
-			Result updateResult = tagRef.update();
+			updateResult = tagRef.update();
 
 			if (updateResult != Result.NEW && updateResult != Result.FORCED)
 				throw new CoreException("Tag "+tag.getTag()+"creation failed (cause: +"+updateResult.toString()+")");
@@ -76,4 +78,15 @@ public class TagOperation implements GitControlOperation {
 			throw new CoreException("Could not find object Id associated with tag "+tag.getTag());
 		}
 	}
+
+
+	@Override
+	public String toString() {
+		if(updateResult!=null){
+			return "Tag Result: "+updateResult.toString();
+		}
+		return super.toString();
+	}
+	
+	
 }

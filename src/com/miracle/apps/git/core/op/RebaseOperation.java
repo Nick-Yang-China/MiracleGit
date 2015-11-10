@@ -2,11 +2,16 @@ package com.miracle.apps.git.core.op;
 
 import com.miracle.apps.git.core.errors.CoreException;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RebaseCommand;
 import org.eclipse.jgit.api.RebaseCommand.InteractiveHandler;
 import org.eclipse.jgit.api.RebaseCommand.Operation;
 import org.eclipse.jgit.api.RebaseResult;
+import org.eclipse.jgit.api.RebaseResult.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NoHeadException;
@@ -15,6 +20,8 @@ import org.eclipse.jgit.lib.NullProgressMonitor;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
+import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 /**
  * This class implements rebase.
@@ -33,7 +40,20 @@ public class RebaseOperation implements GitControlOperation {
 	private boolean preserveMerges = false;
 
 	private MergeStrategy strategy;
+	
+	/**
+	 * Construct a {@link RebaseOperation} object
+	 *
+	 * @param repository
+	 *            the {@link Repository}
+	 * @param branch
+	 *            the short branch or full branch name
+	 *            test or refs/heads/test
+	 */
 
+	public RebaseOperation(Repository repository, String branch) throws IOException {
+		this(repository, repository.getRef(branch), Operation.BEGIN, null);
+	}
 
 	/**
 	 * Construct a {@link RebaseOperation} object for a {@link Ref}.
@@ -173,5 +193,62 @@ public class RebaseOperation implements GitControlOperation {
 	 */
 	public void setStrategy(MergeStrategy strategy) {
 		this.strategy = strategy;
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		if(result!=null){
+			sb.append("Rebase Result: ");
+			Status status=result.getStatus();
+			if(status==Status.OK){
+				sb.append(status);
+			}else if(status==Status.ABORTED){
+				sb.append(status);
+			}else if(status==Status.STOPPED){
+				sb.append(status);
+				RevCommit commit=result.getCurrentCommit();
+				sb.append("\n"+commit.getId()+"|"+commit.getShortMessage());
+			}else if(status==Status.EDIT){
+				sb.append(status);
+			}else if(status==Status.FAILED){
+				sb.append(status);
+		    	Map<String,MergeFailureReason> fail=result.getFailingPaths();
+		    	for(Map.Entry<String, MergeFailureReason> entry:fail.entrySet()){
+		    		sb.append("\n"+entry.getKey()+"-->"+entry.getValue().toString());
+		    	}
+			}else if(status==Status.UNCOMMITTED_CHANGES){
+				sb.append(status);
+				List<String> changes=result.getUncommittedChanges();
+				sb.append("\nUncommitted Changes: ");
+				for(String str:changes){
+					sb.append("\n"+str);
+				}
+			}else if(status==Status.CONFLICTS){
+				sb.append(status);
+				List<String> conflicts=result.getConflicts();
+				sb.append("\nList of Conflicts: ");
+				for(String str:conflicts){
+					sb.append("\n"+str);
+				}
+			}else if(status==Status.UP_TO_DATE){
+				sb.append(status);
+			}else if(status==Status.FAST_FORWARD){
+				sb.append(status);
+			}else if(status==Status.NOTHING_TO_COMMIT){
+				sb.append(status);
+			}else if(status==Status.INTERACTIVE_PREPARED){
+				sb.append(status);
+			}else if(status==Status.STASH_APPLY_CONFLICTS){
+				sb.append(status);
+			}
+			return sb.toString();
+		}
+		return super.toString();
+	}
+	
+	public RebaseOperation setResult(RebaseResult result) {
+		this.result = result;
+		return this;
 	}
 }

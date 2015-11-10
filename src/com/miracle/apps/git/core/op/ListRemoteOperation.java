@@ -9,6 +9,8 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+
 import com.miracle.apps.git.core.errors.CoreException;
 
 /**
@@ -81,6 +83,16 @@ public class ListRemoteOperation implements GitControlOperation {
 	public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
 		this.credentialsProvider=credentialsProvider;
 	}
+	
+	/**
+	 * Sets a credentials provider
+	 * @param username
+	 * @param password
+	 */
+	public void setCredentialsProvider(String username, String password) {
+		if(username!=null && password!=null)
+			this.credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+	}
 
 	public void setHeads(boolean heads) {
 		this.heads = heads;
@@ -113,4 +125,20 @@ public class ListRemoteOperation implements GitControlOperation {
 			throw new CoreException(e.getMessage());
 		}
 	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		if(remoteRefs!=null){
+			sb.append("The Collection of references are below:");
+			for(Ref ref:remoteRefs){
+				sb.append("\n"+ref.getName());
+			}
+			return sb.toString();
+		}
+		return super.toString();
+	}
+	
+	
+	
 }

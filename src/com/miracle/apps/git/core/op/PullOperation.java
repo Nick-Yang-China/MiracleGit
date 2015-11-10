@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.RebaseCommand.Operation;
+import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidConfigurationException;
@@ -16,6 +18,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.TrackingRefUpdate;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 /**
@@ -138,4 +141,24 @@ public class PullOperation implements GitControlOperation{
 			if(remote.equals("."))
 				sc.setString(ConfigConstants.CONFIG_BRANCH_SECTION, CurrentBranch, ConfigConstants.CONFIG_KEY_REMOTE, Constants.DEFAULT_REMOTE_NAME);
 	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		if(this.pullResult!=null){
+			if(pullResult.getFetchResult()!=null){
+				sb.append(new FetchOperation(repository, null, 0, false).setResult(pullResult.getFetchResult()).toString());
+			}
+			if(pullResult.getMergeResult()!=null){
+				sb.append("\n"+new MergeOperation(repository, null).setMergeResult(pullResult.getMergeResult()).toString());
+			}
+			if(pullResult.getRebaseResult()!=null){
+				sb.append("\n"+new RebaseOperation(repository,Operation.BEGIN).setResult(pullResult.getRebaseResult()));
+			}
+			return sb.toString();
+		}
+		return super.toString();
+	}
+	
+	
 }

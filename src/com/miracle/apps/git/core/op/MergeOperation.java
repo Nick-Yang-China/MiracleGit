@@ -1,11 +1,13 @@
 package com.miracle.apps.git.core.op;
 
 import java.io.IOException;
-
+import java.util.List;
+import java.util.Map;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.MergeCommand.FastForwardMode;
 import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.MergeResult.MergeStatus;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -14,6 +16,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
+import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.miracle.apps.git.core.errors.CoreException;
 
@@ -62,6 +67,7 @@ public class MergeOperation implements GitControlOperation{
 	 * @param mergeStrategyName
 	 *            the strategy to use for merge. If not registered, the default
 	 *            merge strategy according to preferences will be used.
+	 *            OURS;THEIRS;SIMPLE_TWO_WAY_IN_CORE;RESOLVE;RECURSIVE
 	 */
 	public MergeOperation( Repository repository,String refName,
 			 String mergeStrategyName) {
@@ -157,4 +163,80 @@ public class MergeOperation implements GitControlOperation{
 	public MergeResult getResult() {
 		return this.mergeResult;
 	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		if(mergeResult!=null){
+			sb.append("Merge Result:");
+			MergeStatus status=mergeResult.getMergeStatus();
+		    if(status==MergeStatus.FAST_FORWARD){
+		    	sb.append(status);
+		    }else if(status==MergeStatus.FAST_FORWARD_SQUASHED){
+		    	sb.append(status);
+		    }else if(status==MergeStatus.ALREADY_UP_TO_DATE){
+		    	sb.append(status);
+		    }else if(status==MergeStatus.ABORTED){
+		    	sb.append(status);
+		    }else if(status==MergeStatus.FAILED){
+		    	sb.append(status);
+		    	Map<String,MergeFailureReason> fail=mergeResult.getFailingPaths();
+		    	for(Map.Entry<String, MergeFailureReason> entry:fail.entrySet()){
+		    		sb.append("\n"+entry.getKey()+"-->"+entry.getValue().toString());
+		    	}
+		    	
+		    }else if(status==MergeStatus.CONFLICTING){
+		    	sb.append(status);
+		    	 Map<String, int[][]> allConflicts = mergeResult.getConflicts();
+		    	 for (String path : allConflicts.keySet()) {
+		    	 	int[][] c = allConflicts.get(path);
+		    	 	sb.append("\nConflicts in file " + path);
+		    	 	for (int i = 0; i < c.length; ++i) {
+		    	 		sb.append("\n  Conflict #" + i);
+		    	 		for (int j = 0; j < (c[i].length) - 1; ++j) {
+		    	 			if (c[i][j] >= 0)
+		    	 				sb.append("\n    Chunk for "
+		    	 						+ mergeResult.getMergedCommits()[j] + " starts on line #"
+		    	 						+ c[i][j]);
+		    	 		}
+		    	 	}
+		    	 }
+		    }else if(status==MergeStatus.CHECKOUT_CONFLICT){
+		    	sb.append(status);
+		    	List<String> list=mergeResult.getCheckoutConflicts();
+		    	sb.append("\nConflicts in path:");
+		    	for(String str:list){
+		    		sb.append("\n"+str);
+		    	}
+		    }else if(status==MergeStatus.MERGED){
+		    	sb.append(status);
+		    	sb.append("\nMerge Input:");
+		    	ObjectId[] objs=mergeResult.getMergedCommits();
+		    	for(ObjectId obj:objs){
+		    		try(RevWalk rw=new RevWalk(repository)){
+		    			RevCommit commit=rw.parseCommit(obj);
+		    			sb.append("\n"+commit.getId()+"|"+commit.getShortMessage());
+		    		} catch (IOException e) {
+						e.printStackTrace();
+					}
+		    	}
+		    }else if(status==MergeStatus.MERGED_NOT_COMMITTED){
+		    	sb.append(status);
+		    }else if(status==MergeStatus.MERGED_SQUASHED){
+		    	sb.append(status);
+		    }else if(status==MergeStatus.MERGED_SQUASHED_NOT_COMMITTED){
+		    	sb.append(status);
+		    }else if(status==MergeStatus.NOT_SUPPORTED){
+		    	sb.append(status);
+		    }
+			return sb.toString();
+		}
+		return super.toString();
+	}
+	
+	public MergeOperation setMergeResult(MergeResult mergeResult) {
+		this.mergeResult = mergeResult;
+		return this;
+	}
+	
 }

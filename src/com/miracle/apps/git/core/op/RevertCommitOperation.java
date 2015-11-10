@@ -1,5 +1,6 @@
 package com.miracle.apps.git.core.op;
 
+import java.util.Arrays;
 import java.util.List;
 import com.miracle.apps.git.core.errors.CoreException;
 import org.eclipse.jgit.api.Git;
@@ -23,11 +24,25 @@ public class RevertCommitOperation implements GitControlOperation {
 	private RevCommit newHead;
 
 	private List<Ref> reverted;
+	
+	private List<String> paths;
 
 	private MergeResult result;
 	
 	private String strategyName;
 
+	/**
+	 * Create revert commit operation
+	 *
+	 * @param repository
+	 * @param commit
+	 *            the commit to revert
+	 */
+	public RevertCommitOperation(Repository repository, RevCommit commit) {
+		this.repo = repository;
+		this.commits = Arrays.asList(commit);
+	}
+	
 	/**
 	 * Create revert commit operation
 	 *
@@ -67,6 +82,7 @@ public class RevertCommitOperation implements GitControlOperation {
 					newHead = command.call();
 					reverted = command.getRevertedRefs();
 					result = command.getFailingResult();
+					paths=command.getUnmergedPaths();
 				} catch (GitAPIException e) {
 					throw new CoreException(e.getLocalizedMessage(),
 							e.getCause());
@@ -82,6 +98,9 @@ public class RevertCommitOperation implements GitControlOperation {
 		return result;
 	}
 	
+	public List<String> getUnmergedPaths(){
+		return paths;
+	}
 	/**
 	 * Setup the StrategyName
 	 * @param strategyName
@@ -89,4 +108,31 @@ public class RevertCommitOperation implements GitControlOperation {
 	public void setStrategyName(String strategyName) {
 		this.strategyName = strategyName;
 	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		sb.append("Revert Commit Result: \n");
+		if(newHead!=null){
+			sb.append(newHead.getId()+"|"+newHead.getShortMessage());
+		}
+		if(!reverted.isEmpty()){
+			sb.append("\nReverted Refs: ");
+			for(Ref ref:reverted){
+				sb.append("\n"+ref.getName());
+			}
+		}
+		if(result!=null){
+			new MergeOperation(repo, null).setMergeResult(result).toString();
+		}
+		if(paths!=null){
+			sb.append("\nUnmerged Paths:");
+			for(String str:paths){
+				sb.append("\n"+str);
+			}
+		}
+		return sb.toString();
+	}
+	
+	
 }

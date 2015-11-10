@@ -2,6 +2,8 @@ package com.miracle.apps.git.core.op;
 
 import com.miracle.apps.git.core.errors.CoreException;
 import java.util.Collection;
+import java.util.Iterator;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ReflogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -51,6 +53,20 @@ public class ReflogOperation implements GitControlOperation {
 	
 	public Collection<ReflogEntry> getReflogResults(){
 		return this.reflog;
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		if(reflog!=null){
+			sb.append("Reflog History: ");
+			for(Iterator<ReflogEntry> it=reflog.iterator();it.hasNext();){
+				ReflogEntry log=it.next();
+				sb.append("\n"+log.getNewId().getName()+"|"+log.getComment());
+			}
+			return sb.toString();
+		}
+		return super.toString();
 	}
 	
 }

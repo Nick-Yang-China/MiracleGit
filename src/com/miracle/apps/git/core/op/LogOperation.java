@@ -3,6 +3,7 @@ package com.miracle.apps.git.core.op;
 import com.miracle.apps.git.core.errors.CoreException;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LogCommand;
@@ -84,4 +85,22 @@ public class LogOperation implements GitControlOperation {
 	public void setMaxCount(int maxCount) {
 		this.maxCount = maxCount;
 	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		if(commits!=null){
+			sb.append("Show In History:");
+			Iterator<RevCommit> RevCommits=this.commits.iterator();
+			while(RevCommits.hasNext()){
+				RevCommit commit=RevCommits.next();
+				sb.append("\n"+commit.getId()+"|"+commit.getShortMessage());
+			}
+			return sb.toString();
+		}
+		return super.toString();
+	}
+	
+	
+	
 }

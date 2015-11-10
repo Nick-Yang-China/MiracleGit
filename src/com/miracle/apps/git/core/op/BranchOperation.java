@@ -35,28 +35,13 @@ public class BranchOperation implements GitControlOperation {
 	 *
 	 * @param repository
 	 * @param target
-	 *            a {@link Ref} name or {@link RevCommit} id
+	 *            a short branch name or full name like below:
+	 *            test or refs/heads/test
 	 */
 	public BranchOperation(Repository repository, String target) {
 		this.repository=repository;
 		this.target = target;
 	}
-
-//	/**
-//	 * Construct a {@link BranchOperation} object for a {@link Ref}.
-//	 *
-//	 * @param repository
-//	 * @param target
-//	 *            a {@link Ref} name or {@link RevCommit} id
-//	 * @param delete
-//	 *            true to delete missing projects on new branch, false to close
-//	 *            them
-//	 */
-//	public BranchOperation(Repository repository, String target, boolean delete) {
-//		this.repository=repository;
-//		this.target = target;
-//		this.delete = delete;
-//	}
 
 	@Override
 	public void execute() throws CoreException {
@@ -110,4 +95,28 @@ public class BranchOperation implements GitControlOperation {
 		}
 	}
 
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		CheckoutResult cr=this.result;
+		switch (cr.getStatus()) {
+		case OK:
+			sb.append("Checkout completed normally");
+			break;
+		case CONFLICTS:
+			sb.append("Checkout has not completed because of below checkout conflicts");
+			for(String str :cr.getConflictList()){
+				sb.append("\n"+str);
+			}
+			break;
+		case ERROR:
+			sb.append("An Exception occurred during checkout");
+			break;
+		default:
+			break;
+		}
+		return sb.toString();
+	}
+
+	
 }

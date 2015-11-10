@@ -30,7 +30,9 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 	private UpstreamConfig upstreamConfig;
 	
 	private boolean checkOutFlag;
-
+	
+	private Ref ref;
+	
 	/**
 	 * @param repository
 	 * @param name
@@ -53,10 +55,9 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 	 * @param repository
 	 * @param name
 	 *            the name for the new local branch (without prefix)
-	 * @param ref
-	 *            the branch or tag to base the new branch upon
-	 * @param config
-	 *            how to do the upstream configuration
+	 * @param basebranchname
+	 *            the branch name or tag name to base the new branch upon:
+	 *            master or refs/heads/master
 	 * @throws IOException 
 	 */
 	public CreateLocalBranchOperation(Repository repository, String newname,
@@ -93,11 +94,11 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 							mode = SetupUpstreamMode.NOTRACK;
 						else
 							mode = SetupUpstreamMode.SET_UPSTREAM;
-						git.branchCreate().setName(name).setStartPoint(
+						ref=git.branchCreate().setName(name).setStartPoint(
 								baseBranchName).setUpstreamMode(mode).call();
 					}
 					else
-						git.branchCreate().setName(name).setStartPoint(commit)
+						ref=git.branchCreate().setName(name).setStartPoint(commit)
 								.setUpstreamMode(SetupUpstreamMode.NOTRACK)
 								.call();
 				} catch (Exception e) {
@@ -187,4 +188,13 @@ public class CreateLocalBranchOperation implements GitControlOperation {
 		this.upstreamConfig = upstreamConfig;
 	}
 
+	@Override
+	public String toString() {
+		if(ref!=null){
+			return new StringBuffer().append("BranchCreate: ").append(ref.getName()).toString();
+		}
+		return super.toString();
+	}
+
+	
 }

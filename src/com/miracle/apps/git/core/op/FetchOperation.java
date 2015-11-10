@@ -11,7 +11,9 @@ import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.TagOpt;
+import org.eclipse.jgit.transport.TrackingRefUpdate;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import com.miracle.apps.git.core.errors.CoreException;
 
@@ -36,6 +38,8 @@ public class FetchOperation implements GitControlOperation {
 	private CredentialsProvider credentialsProvider;
 
 	private TagOpt tagOpt;
+	
+	private FetchResult result;
 
 	/**
 	 * Constructs a FetchOperation based on URI and RefSpecs
@@ -81,6 +85,15 @@ public class FetchOperation implements GitControlOperation {
 	public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
 		this.credentialsProvider = credentialsProvider;
 	}
+	
+	/**
+	 * @param username
+	 * @param password
+	 */
+	public void setCredentialsProvider(String username,String password) {
+		if(username!=null && password!=null)
+			this.credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+	}
 
 	/**
 	 * @return the operation's credentials provider
@@ -119,7 +132,7 @@ public class FetchOperation implements GitControlOperation {
 		if (tagOpt != null)
 			command.setTagOpt(tagOpt);
 		try {
-			FetchResult result=command.call();
+			result=command.call();
 			operationResult=new FetchOperationResult(result.getURI(), result);
 		} catch (JGitInternalException e) {
 			throw new CoreException(e.getMessage());
@@ -127,4 +140,24 @@ public class FetchOperation implements GitControlOperation {
 			throw new CoreException(e.getMessage());
 		}
 	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		if(result!=null){
+			sb.append("Fetch Result:"+result.getURI().toString());
+			sb.append("\nRemoteTrackingList:");
+			for(TrackingRefUpdate trf:result.getTrackingRefUpdates()){
+				sb.append("\n"+trf.getRemoteName()+"--->"+trf.getLocalName());
+			}
+			return sb.toString();
+		}
+		return super.toString();
+	}
+	
+	public FetchOperation setResult(FetchResult result) {
+		this.result = result;
+		return this;
+	}
+	
 }

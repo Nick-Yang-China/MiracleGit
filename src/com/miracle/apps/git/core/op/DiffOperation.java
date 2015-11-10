@@ -43,7 +43,8 @@ public class DiffOperation implements GitControlOperation {
 	 * Create operation gets the diff information
 	 *
 	 * @param repository
-	 * @param ref
+	 * @param path
+	 * 			Path strings use '/' to delimit directories on all platforms.
 	 */
 	public DiffOperation(final Repository repository, final String path) {
 		this.repository = repository;
@@ -76,7 +77,8 @@ public class DiffOperation implements GitControlOperation {
 		return this.diffs;
 	}
 	
-	public String getDiffInfo(){
+	@Override
+	public String toString(){
 		return out.toString();
 	}
 	

@@ -4,6 +4,8 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -216,4 +218,32 @@ public class PushOperation implements GitControlOperation{
 			}
 		}
 	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		sb.append("Push Result: ");
+		if(operationResult!=null){
+			Set<URIish> uris=operationResult.getURIs();
+			for(URIish uri:uris){
+				PushResult rr=operationResult.getPushResult(uri);
+				sb.append("\nURI: "+rr.getURI().toString());
+				Collection<RemoteRefUpdate> cols=rr.getRemoteUpdates();
+				for(RemoteRefUpdate rrf:cols){
+					sb.append("\nStatus: "+rrf.getStatus());
+					if(rrf.getMessage()!=null){
+						sb.append("\nMessages: "+rrf.getMessage());
+					}
+					sb.append("\nRemoteName: "+rrf.getRemoteName());
+				}
+				sb.append("\n----------------------------------------");
+			}
+			
+			return sb.toString();
+		}
+		return super.toString();
+	}
+	
+	
+	
 }

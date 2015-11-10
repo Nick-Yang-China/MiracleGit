@@ -1,7 +1,11 @@
 package com.miracle.apps.git.core.op;
 
 import static java.util.Arrays.asList;
+
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
@@ -37,9 +41,23 @@ public class DeleteBranchOperation implements GitControlOperation {
 
 	private final Repository repository;
 
-	private final Set<Ref> branches;
+	private final List<String> branches;
 
 	private final boolean force;
+	
+	private List<String> deleteBranchList;
+	
+	/**
+	 * @param repository
+	 * @param branch
+	 *            the branch to delete: test or refs/heads/test
+	 * @param force
+	 * @throws IOException 
+	 */
+	public DeleteBranchOperation(Repository repository, String branch,
+			boolean force) throws IOException {
+		this(repository, Arrays.asList(branch), force);
+	}
 
 	/**
 	 * @param repository
@@ -49,7 +67,7 @@ public class DeleteBranchOperation implements GitControlOperation {
 	 */
 	public DeleteBranchOperation(Repository repository, Ref branch,
 			boolean force) {
-		this(repository, new HashSet<Ref>(asList(branch)), force);
+		this(repository, Arrays.asList(branch.getName()), force);
 	}
 
 	/**
@@ -58,7 +76,7 @@ public class DeleteBranchOperation implements GitControlOperation {
 	 *            the list of branches to deleted
 	 * @param force
 	 */
-	public DeleteBranchOperation(Repository repository, Set<Ref> branches,
+	public DeleteBranchOperation(Repository repository, List<String> branches,
 			boolean force) {
 		this.repository = repository;
 		this.branches = branches;
@@ -75,23 +93,42 @@ public class DeleteBranchOperation implements GitControlOperation {
 
 	@Override
 	public void execute() throws CoreException {
-				for (Ref branch : branches) {
+	
+					String[] branchnames=branches.toArray(new String[branches.size()]);
 					try {
-						new Git(repository).branchDelete().setBranchNames(
-								branch.getName()).setForce(force).call();
+						deleteBranchList=new Git(repository).branchDelete().setBranchNames(
+								branchnames).setForce(force).call();
 						status = OK;
 					} catch (NotMergedException e) {
 						status = REJECTED_UNMERGED;
-						break;
 					} catch (CannotDeleteCurrentBranchException e) {
 						status = REJECTED_CURRENT;
-						break;
 					} catch (JGitInternalException e) {
 						throw new CoreException(e.getMessage(), e);
 					} catch (GitAPIException e) {
 						throw new CoreException(e.getMessage(), e);
 					}
-				}
 			}
+
+	@Override
+	public String toString() {
+		StringBuffer sb=new StringBuffer();
+		if(status==OK){
+			sb.append("BranchDelete completed normally, below are deletebranchlist:");
+			for(String branchList : deleteBranchList){
+					sb.append("\n"+branchList);
+			}
+		}else if (status==REJECTED_CURRENT) {
+			sb.append("The current branch can not be deleted successfully");
+		}else if(status==REJECTED_UNMERGED){
+			sb.append("Branch to be deleted has not been fully merged; use force to delete anyway");
+		}else{
+			sb.append("An Exception occurred during deletebranch");
+		}
+		
+		return sb.toString();
 	}
+
+}
+
 

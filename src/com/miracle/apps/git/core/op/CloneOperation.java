@@ -115,17 +115,7 @@ public class CloneOperation implements GitControlOperation {
 			repository = git.getRepository();
 			status=repository.getRepositoryState().toString();
 		} catch (Exception e) {
-			
 			throw new CoreException("Clone operation failed:",e);
-//				if (repository != null)
-//					repository.close();
-//				try {
-//					FileUtils.delete(workdir, FileUtils.RECURSIVE | FileUtils.RETRY);
-//				} catch (IOException e1) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-
 		} finally {
 				repository.close();
 		}
