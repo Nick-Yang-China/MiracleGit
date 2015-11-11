@@ -61,7 +61,9 @@ public class DiffOperation implements GitControlOperation {
 				dc.setPathFilter(PathFilter.create(path));
 				if(isAdded(path))
 					dc.setCached(true);
-				else{
+				else if(isModified(path)){
+					dc.setOldTree(getTreeIterator("HEAD"));
+				}else{
 					dc.setOldTree(getTreeIterator("HEAD^"));
 				}
 			}
@@ -85,6 +87,14 @@ public class DiffOperation implements GitControlOperation {
 	private boolean isAdded(String path) throws NoWorkTreeException, GitAPIException{
 		if(path!=null)
 			if(git.status().addPath(path).call().getAdded().size()!=0){
+				return true;
+			}
+		return false;
+	}
+	
+	private boolean isModified(String path) throws NoWorkTreeException, GitAPIException{
+		if(path!=null)
+			if(git.status().addPath(path).call().getModified().size()!=0){
 				return true;
 			}
 		return false;
