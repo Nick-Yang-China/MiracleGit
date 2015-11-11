@@ -26,6 +26,10 @@ public class DiffOperation implements GitControlOperation {
 	private final Repository repository;
 	
 	private final String path;
+	
+	private final String oldTree;
+	
+	private final String newTree;
 
 	private List<DiffEntry> diffs;
 
@@ -37,6 +41,8 @@ public class DiffOperation implements GitControlOperation {
 	public DiffOperation(final Repository repository){
 		this.repository = repository;
 		this.path=null;
+		this.oldTree=null;
+		this.newTree=null;
 	}
 
 	/**
@@ -49,6 +55,22 @@ public class DiffOperation implements GitControlOperation {
 	public DiffOperation(final Repository repository, final String path) {
 		this.repository = repository;
 		this.path=path;
+		this.oldTree=null;
+		this.newTree=null;
+	}
+	
+	/**
+	 * Create operation gets the diff information
+	 *
+	 * @param repository
+	 * @param path
+	 * 			Path strings use '/' to delimit directories on all platforms.
+	 */
+	public DiffOperation(final Repository repository, final String path,final String newTree,final String oldTree) {
+		this.repository = repository;
+		this.path=path;
+		this.newTree=newTree;
+		this.oldTree=oldTree;
 	}
 	
 
@@ -63,6 +85,9 @@ public class DiffOperation implements GitControlOperation {
 					dc.setCached(true);
 				else if(isModified(path)){
 					dc.setOldTree(getTreeIterator("HEAD"));
+				}else if(oldTree!=null && newTree!=null){
+					dc.setNewTree(getTreeIterator(newTree));
+					dc.setOldTree(getTreeIterator(oldTree));
 				}else{
 					dc.setOldTree(getTreeIterator("HEAD^"));
 				}

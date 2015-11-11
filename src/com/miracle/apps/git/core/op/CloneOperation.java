@@ -117,6 +117,7 @@ public class CloneOperation implements GitControlOperation {
 		} catch (Exception e) {
 			throw new CoreException("Clone operation failed:",e);
 		} finally {
+			if(repository!=null)
 				repository.close();
 		}
 	}
