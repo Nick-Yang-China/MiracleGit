@@ -26,6 +26,7 @@ import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.UnmergedPathException;
 import org.eclipse.jgit.lib.CheckoutEntry;
 import org.eclipse.jgit.lib.Constants;
@@ -207,7 +208,7 @@ public class RepositoryUtil {
 		return null;
 	}
 	
-	public Collection<String> getRepoRelativePathwithMulitPaths(String path) {
+	public Collection<String> getRepoRelativePathwithMulitPaths(String... path) {
 		return getRepoRelativePathwithMulitPaths(Arrays.asList(path));
 	}
 	/**
@@ -282,7 +283,7 @@ public class RepositoryUtil {
 	 * @return short branch text
 	 * @throws IOException
 	 */
-	public String getShortBranch(Repository repository) throws IOException {
+	public String getShortBranch() throws IOException {
 		Ref head = repository.getRef(Constants.HEAD);
 		if (head == null || head.getObjectId() == null)
 			return "NO-HEAD";
@@ -480,6 +481,23 @@ public class RepositoryUtil {
 			cacheEntry.put(commitId, cacheValue);
 			return cacheValue;
 		}
+	}
+	
+	public RevCommit mapCommitIdToRevCommit(String commitId){
+		RevCommit commit = null;
+		if (!ObjectId.isId(commitId)) {
+			return null;
+		}
+		try(RevWalk revWalk=new RevWalk(repository)){
+			commit=revWalk.parseCommit(ObjectId.fromString(commitId));
+		} catch (MissingObjectException e) {
+			e.printStackTrace();
+		} catch (IncorrectObjectTypeException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return commit;
 	}
 	
 	/**

@@ -20,6 +20,8 @@ public class ResetOperation implements GitControlOperation {
 
 	private final ResetType type;
 	
+	private String path;
+	
 	private Ref ref;
 
 	/**
@@ -41,13 +43,23 @@ public class ResetOperation implements GitControlOperation {
 	@Override
 	public void execute() throws CoreException {
 		ResetCommand reset = Git.wrap(repository).reset();
-		reset.setMode(type);
+		if(type!=null){
+			reset.setMode(type);
+		}
 		reset.setRef(refName);
+		if(path!=null){
+			reset.addPath(path);
+		}
 		try {
 			ref=reset.call();
 		} catch (GitAPIException e) {
 			throw new CoreException(e.getLocalizedMessage(), e.getCause());
 		}
+	}
+
+	public ResetOperation setPath(String path) {
+		this.path = path;
+		return this;
 	}
 
 	@Override
