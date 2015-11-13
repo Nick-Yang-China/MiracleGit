@@ -292,7 +292,7 @@ public class RepositoryUtil {
 			return repository.getBranch();
 
 		String id = head.getObjectId().name();
-		String ref = mapCommitToRef(repository, id, false);
+		String ref = mapCommitToRef(id, false);
 		if (ref != null)
 			return Repository.shortenRefName(ref) + ' ' + id.substring(0, 7);
 		else
@@ -327,8 +327,7 @@ public class RepositoryUtil {
 	 * @return the symbolic reference, or <code>null</code> if no such reference
 	 *         can be found
 	 */
-	public String mapCommitToRef(Repository repository, String commitId,
-			boolean refresh) {
+	public String mapCommitToRef(String commitId,boolean refresh) {
 		synchronized (commitMappingCache) {
 
 			if (!ObjectId.isId(commitId)) {
