@@ -42,6 +42,8 @@ public class CloneOperation implements GitControlOperation {
 
 	private String status;
 	
+	private int flag;
+
 	/**
 	 * Create a new clone operation.
 	 *
@@ -114,14 +116,13 @@ public class CloneOperation implements GitControlOperation {
 			Git git = cloneRepository.call();
 			repository = git.getRepository();
 			status=repository.getRepositoryState().toString();
-		} catch (Exception e) {
-			if (workdir.exists()){
-				try {
-					FileUtils.delete(workdir, FileUtils.RECURSIVE | FileUtils.RETRY);
-				} catch (IOException e1) {
-					//ignore here
-				}
+			if(!checkIfBranchExists(repository)){
+				flag=5;
+				deleteLocalGitDir();
 			}
+			
+		} catch (Exception e) {
+			deleteLocalGitDir();
 			throw new CoreException("Clone operation failed:",e);
 		} finally {
 			if(repository!=null)
@@ -132,4 +133,28 @@ public class CloneOperation implements GitControlOperation {
 	public String getCloneStatus() {
 		return this.status;
 	}
+	
+	private void deleteLocalGitDir(){
+		if (workdir.exists()){
+			try {
+				FileUtils.delete(workdir, FileUtils.RECURSIVE | FileUtils.RETRY);
+			} catch (IOException e1) {
+				//ignore here
+			}
+		}
+	}
+	private boolean checkIfBranchExists(Repository repository){
+		try {
+			if(repository.getRef(refName)!=null){
+				return true;
+			}
+		} catch (IOException e) {
+			return false;
+		}
+		return false;
+	}
+	public int getFlag() {
+		return flag;
+	}
+	
 }
