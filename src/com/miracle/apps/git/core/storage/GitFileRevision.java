@@ -13,7 +13,7 @@ import com.miracle.apps.git.core.errors.CoreException;
  * A Git related {@link IFileRevision}. It references a version and a resource,
  * i.e. the version we think corresponds to the resource in specific version.
  */
-public abstract class GitFileRevision {
+public class GitFileRevision {
 	/** Content identifier for the working copy. */
 	public static final String WORKSPACE = "Workspace";  //$NON-NLS-1$
 
