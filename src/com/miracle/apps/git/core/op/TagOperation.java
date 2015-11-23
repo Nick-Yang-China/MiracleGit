@@ -56,11 +56,15 @@ public class TagOperation implements GitControlOperation {
 			tagRef.setForceUpdate(shouldMoveTag);
 			updateResult = tagRef.update();
 
-			if (updateResult != Result.NEW && updateResult != Result.FORCED)
-				throw new CoreException("Tag "+tag.getTag()+"creation failed (cause: +"+updateResult.toString()+")");
+//			if (updateResult != Result.NEW && updateResult != Result.FORCED)
+//				throw new CoreException("Tag "+tag.getTag()+"creation failed (cause: +"+updateResult.toString()+")");
 		} catch (IOException e) {
 			throw new CoreException("Tag "+tag.getTag()+" creation failed",e);
 		}
+	}
+	
+	public Result getCreateTagResult(){
+		return this.updateResult;
 	}
 
 	private ObjectId updateTagObject() throws GitAPIException {

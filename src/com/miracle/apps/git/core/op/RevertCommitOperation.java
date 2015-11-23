@@ -7,6 +7,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.RevertCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
@@ -30,6 +31,17 @@ public class RevertCommitOperation implements GitControlOperation {
 	private MergeResult result;
 	
 	private String strategyName;
+	
+	private String name;
+	
+	private AnyObjectId commit;
+	
+	public RevertCommitOperation(Repository repository,String name,AnyObjectId commit) {
+		this.repo = repository;
+		this.name=name;
+		this.commit=commit;
+		this.commits=null;
+	}	
 
 	/**
 	 * Create revert commit operation
@@ -76,8 +88,14 @@ public class RevertCommitOperation implements GitControlOperation {
 				if (strategy != null) {
 					command.setStrategy(strategy);
 				}
-				for (RevCommit commit : commits)
-					command.include(commit);
+				if(name!=null && commit!=null){
+					command.include(name, commit);
+				}
+				if(commits!=null && !commits.isEmpty()){
+					for (RevCommit commit : commits){
+						command.include(commit);
+					}
+				}
 				try {
 					newHead = command.call();
 					reverted = command.getRevertedRefs();
