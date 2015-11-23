@@ -1,7 +1,10 @@
 package com.miracle.apps.git.core;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -497,6 +500,53 @@ public class RepositoryUtil {
 			e.printStackTrace();
 		}
 		return commit;
+	}
+	
+	
+	/**
+	 * Tries to split the conflict file
+	 * @param file 
+	 *          the absolute path of conflict file
+	 * @return map
+	 *         Map<String,String>
+	 */
+	public Map<String,String> getConflictFileContentWithSplit(File file){
+		StringBuffer sb=new StringBuffer();
+		Map<String,String> map=new HashMap<String, String>();
+		BufferedReader br=null;
+		String temp=null;
+		try {
+			br=new BufferedReader(new FileReader(file));
+			
+			while((temp=br.readLine())!=null){
+				String str=new String(temp);
+				if(str.startsWith("<<<<<<<")){
+					sb.append(str.substring(7).trim());
+				}else if(str.startsWith("[{") && str.endsWith("}]")){
+					sb.append(str);
+				}else if(str.startsWith("=======")){
+					continue;
+				}else if(str.startsWith(">>>>>>>")){
+					sb.append(str.substring(7).trim());
+					break;
+				}
+				sb.append("SPLIT");
+			}
+			
+			
+			String[] strs= sb.toString().split("SPLIT");
+			if(strs.length==4){
+				map.put(strs[0], strs[1]);
+				map.put(strs[3], strs[2]);
+			}
+			
+			br.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return map;
 	}
 	
 	/**
