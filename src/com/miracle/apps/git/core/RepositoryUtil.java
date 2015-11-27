@@ -1,10 +1,12 @@
 package com.miracle.apps.git.core;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -15,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import org.eclipse.jgit.api.CommitCommand;
@@ -548,6 +551,54 @@ public class RepositoryUtil {
 		}
 		return map;
 	}
+	
+	
+	/**
+	 * Tries to revert back conflict file
+	 * @param file 
+	 *          the absolute path of conflict file
+	 * @param source
+	 *          file contents 
+	 * @throws IOException 
+	 */
+	public void revertMapContentToConflictFile(File file,Map<String,String> source) throws IOException{
+		
+		String[] strs=new String[4];
+		for (Map.Entry<String, String> entry : source.entrySet()) {  
+			if(entry.getKey().equals("HEAD")){
+				strs[0]=entry.getKey();
+				strs[1]=entry.getValue();
+			}else if(entry.getKey().startsWith("branch")){
+				strs[3]=entry.getKey();
+				strs[2]=entry.getValue();
+			}
+		} 
+		
+		BufferedWriter bw=null;
+		try {
+			bw=new BufferedWriter(new FileWriter(file));
+			bw.write("<<<<<<< "+strs[0]);
+			bw.newLine();
+			bw.write(strs[1]);
+			bw.newLine();
+			bw.write("=======");
+			bw.newLine();
+			bw.write(strs[2]);
+			bw.newLine();
+			bw.write(">>>>>>> "+strs[3]);
+			
+			bw.flush();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally{
+			if(bw!=null){
+				bw.close();
+			}
+		}
+	}
+	
 	
 	/**
 	 * Appends content to end of given file.
