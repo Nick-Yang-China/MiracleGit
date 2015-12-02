@@ -16,6 +16,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.util.FileUtils;
 
+import com.miracle.apps.git.core.credentials.MiraclesCredentialsProvider;
 import com.miracle.apps.git.core.errors.CoreException;
 
 /**
@@ -84,7 +85,7 @@ public class CloneOperation implements GitControlOperation {
 		this.remoteName = remoteName;
 		this.timeout = timeout;
 		if(username!=null && password !=null)
-		 this.credentialsProvider=new UsernamePasswordCredentialsProvider(username, password);
+		 this.credentialsProvider=new MiraclesCredentialsProvider(username, password);
 	}
 
 	/**
