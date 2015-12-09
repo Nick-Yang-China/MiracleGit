@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import org.eclipse.jgit.api.CommitCommand;
@@ -33,6 +32,7 @@ import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.errors.UnmergedPathException;
 import org.eclipse.jgit.lib.CheckoutEntry;
 import org.eclipse.jgit.lib.Constants;
@@ -42,12 +42,15 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.ReflogEntry;
 import org.eclipse.jgit.lib.ReflogReader;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
 
 /**
@@ -68,7 +71,11 @@ public class RepositoryUtil {
 	
 	public RepositoryUtil(File gitDir) {
 		this.gitDir=gitDir;
-		this.repository=this.createLocalRepositoryByGitDir(gitDir);
+		if(gitDir.exists()){
+			this.repository=this.createRepoWithCacheByGitDir(gitDir);
+		}else{
+			this.repository=this.createLocalRepositoryByGitDir(gitDir);
+		}
 		this.workdirPrefix=getWorkdirPrefix(this.repository);
 	}
 	
@@ -81,10 +88,6 @@ public class RepositoryUtil {
 		Repository tempRepo = null;
 		 try {
 			tempRepo = new FileRepositoryBuilder().findGitDir().readEnvironment().setGitDir(gitDir).build();
-//			workdirPrefix = tempRepo.getWorkTree().getAbsolutePath();
-//			workdirPrefix = workdirPrefix.replace('\\', '/');
-//			if (!workdirPrefix.endsWith("/")) //$NON-NLS-1$
-//				workdirPrefix += "/"; //$NON-NLS-1$
 			
 			if(tempRepo.getObjectDatabase().exists()){
 				 return tempRepo; 
@@ -96,6 +99,24 @@ public class RepositoryUtil {
 			e.printStackTrace();
 		}
 		
+		return tempRepo;
+	}
+	
+	/**
+	 * get the repository, meantime add it the RepositoryCache.
+	 * @param gitDir
+	 * @return Repository 
+	 * 			a git repository which comes from the RepositoryCache
+	 */
+	private Repository createRepoWithCacheByGitDir(File gitDir){
+		Repository tempRepo = null;
+		try {
+			tempRepo=RepositoryCache.open(FileKey.exact(gitDir, FS.DETECTED));
+		} catch (RepositoryNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return tempRepo;
 	}
 	
@@ -111,18 +132,32 @@ public class RepositoryUtil {
 	public File getGitDir(){
 		return this.repository.getDirectory();
 	}
-
+	
+	/**
+	 * close the git repository in the RepositoryCache
+	 * @param repository
+	 */
+	public void closeRepositoryInCache(Repository repository){
+		if(repository!=null){
+			RepositoryCache.close(repository);
+		}
+	}
+	
+	/**
+	 * clear repositories in RepositoryCache
+	 */
+	public void clear(){
+		RepositoryCache.clear();
+	}
+	
 	/**
 	 * close repository
 	 */
 	public void dispose() {
-		
-		commitMappingCache.clear();
 		if (repository != null) {
 			repository.close();
 			repository = null;
 		}
-		
 	}
 
 	
